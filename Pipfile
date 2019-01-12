@@ -1,0 +1,26 @@
+[[source]]
+url = "https://pypi.org/simple"
+name = "pypi"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+yapf = "*"
+pytest = "*"
+automoticz = {path = ".",editable = true}
+pdbpp = "*"
+
+[requires]
+python_version = "3.5"
+
+[packages]
+dynaconf = {extras = ["yaml"],version = "*"}
+flask-jwt-extended = "*"
+flask-sqlalchemy = "*"
+flask-migrate = "*"
+flask-marshmallow = "*"
+marshmallow-sqlalchemy = "*"
+requests = "*"
+pymysql = "*"
+flask-restplus = "*"
+gunicorn = "*"

@@ -16,13 +16,7 @@ refresh_token_field = fields.String(
 # Login models
 login_reguest = api.model(
     'Auth request', {
-        'username':
-        username_field,
-        'blu_id':
-        fields.String(
-            required=True,
-            description='Device bluetooth address',
-            example='91:74:4D:78:FC:30')
+        'username': username_field
     })
 
 login_response = api.model(

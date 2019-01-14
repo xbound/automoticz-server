@@ -1,6 +1,6 @@
 from flask_jwt_extended import get_jti, decode_token
 
-from automoticz.models import User, JWToken, BLEDevice
+from automoticz.models import User, JWToken
 from automoticz.commons.jwt import add_token_to_database
 from automoticz.commons.jwt import is_token_revoked
 from automoticz.commons.jwt import revoke_token

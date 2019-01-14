@@ -18,11 +18,10 @@ from .helpers import revoke_refresh_request
 from .helpers import revoke_refresh_response
 
 from automoticz.extensions import jwt, db
-from automoticz.models import User, BLEDevice
+from automoticz.models import User
 
 from automoticz.commons.constants import MESSAGE
 from automoticz.commons.database import add_new_user_if_not_exists
-from automoticz.commons.database import add_new_ble_device_if_not_exists
 from automoticz.commons.jwt import add_token_to_database
 from automoticz.commons.jwt import is_token_revoked
 from automoticz.commons.jwt import revoke_token
@@ -49,7 +48,6 @@ class Login(Resource):
     def post(self):
         data = api.payload
         user = add_new_user_if_not_exists(data)
-        add_new_ble_device_if_not_exists(user, data)
         access_token = create_access_token(user.id)
         refresh_token = create_refresh_token(user.id)
         add_token_to_database(access_token, app.config.JWT_IDENTITY_CLAIM)

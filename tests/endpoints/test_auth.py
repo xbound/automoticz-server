@@ -2,7 +2,6 @@ def test_registration(app, client, database):
     response = client.post(
         '/api/auth/login',
         json={
-            'blu_id': '91:74:4D:78:FC:30',
             'username': 'user1'
         })
     assert response.status_code == 200
@@ -15,13 +14,11 @@ def test_login(app, client, database):
     response = client.post(
         '/api/auth/login',
         json={
-            'blu_id': '91:74:4D:78:FC:30',
             'username': 'user1'
         })
     response = client.post(
         '/api/auth/login',
         json={
-            'blu_id': '91:74:4D:78:FC:30',
             'username': 'user1'
         })
     assert response.status_code == 200
@@ -32,7 +29,6 @@ def test_refresh(app, client):
     response = client.post(
         '/api/auth/login',
         json={
-            'blu_id': '91:74:4D:78:FC:30',
             'username': 'user1'
         })
     json_data = response.get_json()
@@ -52,7 +48,6 @@ def test_revoke_access(client):
     response = client.post(
         '/api/auth/login',
         json={
-            'blu_id': '91:74:4D:78:FC:30',
             'username': username
         })
     json_data = response.get_json()
@@ -70,7 +65,6 @@ def test_revoke_refresh(client):
     response = client.post(
         '/api/auth/login',
         json={
-            'blu_id': '91:74:4D:78:FC:30',
             'username': username
         })
     json_data = response.get_json()

@@ -3,7 +3,7 @@ import pytest
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import create_refresh_token
 from automoticz.app import create_app
-from automoticz.models import User, BLEDevice
+from automoticz.models import User
 from automoticz.extensions import db as _db
 
 
@@ -33,9 +33,7 @@ def database(app):
 @pytest.fixture
 def user(database):
     username = 'user'
-    blu_id = '91:74:4D:78:FC:30'
     user = User(username=username)
-    user.devices.append(BLEDevice(name=blu_id))
     database.session.add(user)
     database.session.commit()
     return user

@@ -3,8 +3,11 @@ import os
 from flask import Flask
 from dynaconf import FlaskDynaconf
 
-from automoticz.extensions import db, jwt, ma, migrate
-from automoticz.cli import test
+from automoticz.extensions import db
+from automoticz.extensions import jwt
+from automoticz.extensions import ma
+from automoticz.extensions import migrate
+from automoticz import cli
 from automoticz.api.views import blueprint
 from automoticz.commons.constants import ENV
 
@@ -34,7 +37,7 @@ def init_cli(app):
     '''
     Initialize cli commands.
     '''
-    app.cli.add_command(test)
+    app.cli.add_command(cli.test)
 
 
 def register_blueprints(app):

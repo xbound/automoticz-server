@@ -1,4 +1,4 @@
-def test_registration(app, client, database):
+def test_registration(app, client):
     response = client.post(
         '/api/auth/login',
         json={
@@ -10,7 +10,7 @@ def test_registration(app, client, database):
     assert json_data['refresh_token']
 
 
-def test_login(app, client, database):
+def test_login(app, client):
     response = client.post(
         '/api/auth/login',
         json={

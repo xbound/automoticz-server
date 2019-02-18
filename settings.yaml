@@ -1,11 +1,10 @@
 default:
   SQLALCHEMY_TRACK_MODIFICATIONS: true
-  JWT_TOKEN_LOCATION: ['json', 'headers']
+  JWT_TOKEN_LOCATION: ["json", "headers"]
   JWT_BLACKLIST_ENABLED: true
   SWAGGER_UI_JSONEDITOR: true
 development:
   DEBUG: true
-  SQLALCHEMY_DATABASE_URI: "sqlite:////home/devaerial/Ingenerka/Source/automoticz-server/db.sqlite3"
 testing:
   DEBUG: true
   SQLALCHEMY_DATABASE_URI: "sqlite:///:memory:"

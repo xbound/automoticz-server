@@ -7,9 +7,9 @@ from automoticz.extensions import db
 from automoticz.extensions import jwt
 from automoticz.extensions import ma
 from automoticz.extensions import migrate
-from automoticz import cli
+from automoticz.cli import test
 from automoticz.api.views import blueprint
-from automoticz.commons.constants import ENV
+from automoticz.utils.constants import ENV
 
 
 def configure_app(app):
@@ -37,7 +37,7 @@ def init_cli(app):
     '''
     Initialize cli commands.
     '''
-    app.cli.add_command(cli.test)
+    app.cli.add_command(test)
 
 
 def register_blueprints(app):

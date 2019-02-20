@@ -1,6 +1,6 @@
 from flask_restplus import fields
 
-from automoticz.commons.constants import MESSAGE
+from automoticz.utils.constants import MESSAGE
 from automoticz.api.endpoints.auth import auth_namespace as api
 
 # Fields

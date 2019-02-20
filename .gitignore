@@ -120,6 +120,9 @@ dmypy.json
 
 ### Python Patch ###
 .venv/
+
 # Secrets
 .secrets.yaml
+# Google API OAuth client ID
+client-secrets.json
 # End of https://www.gitignore.io/api/python

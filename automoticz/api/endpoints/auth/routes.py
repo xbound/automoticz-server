@@ -20,11 +20,11 @@ from .helpers import revoke_refresh_response
 from automoticz.extensions import jwt, db
 from automoticz.models import User
 
-from automoticz.commons.constants import MESSAGE
-from automoticz.commons.database import add_new_user_if_not_exists
-from automoticz.commons.jwt import add_token_to_database
-from automoticz.commons.jwt import is_token_revoked
-from automoticz.commons.jwt import revoke_token
+from automoticz.utils.constants import MESSAGE
+from automoticz.utils.database import add_new_user_if_not_exists
+from automoticz.utils.jwt import add_token_to_database
+from automoticz.utils.jwt import is_token_revoked
+from automoticz.utils.jwt import revoke_token
 
 
 @jwt.user_loader_callback_loader

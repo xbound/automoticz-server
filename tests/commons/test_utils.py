@@ -1,9 +1,9 @@
 from flask_jwt_extended import get_jti, decode_token
 
 from automoticz.models import User, JWToken
-from automoticz.commons.jwt import add_token_to_database
-from automoticz.commons.jwt import is_token_revoked
-from automoticz.commons.jwt import revoke_token
+from automoticz.utils.jwt import add_token_to_database
+from automoticz.utils.jwt import is_token_revoked
+from automoticz.utils.jwt import revoke_token
 
 
 def test_add_token_to_database(app, access_token, refresh_token):

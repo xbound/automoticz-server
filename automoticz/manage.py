@@ -2,7 +2,7 @@ import sys
 import click
 from flask import current_app as app
 from flask.cli import FlaskGroup
-from automoticz.commons.constants import ENV
+from automoticz.utils.constants import ENV
 from automoticz.app import create_app
 
 

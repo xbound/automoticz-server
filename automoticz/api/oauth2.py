@@ -1,0 +1,1 @@
+from automoticz.api.views import oauth2_blueprint

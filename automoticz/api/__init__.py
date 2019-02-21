@@ -1,5 +1,6 @@
-from .views import blueprint
+from .views import api_blueprint, oauth2_blueprint
 
 __all__ = [
-    'blueprint',
+    'api_blueprint',
+    'oauth2_blueprint',
 ]

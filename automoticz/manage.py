@@ -11,6 +11,3 @@ def cli():
     '''
     Main entry point.
     '''
-    if app.config.ENV == ENV.TESTING:
-        print('Running in TESTING mode...Aborting!')
-        sys.exit(1)

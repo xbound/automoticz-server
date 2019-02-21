@@ -8,7 +8,8 @@ from automoticz.extensions import jwt
 from automoticz.extensions import ma
 from automoticz.extensions import migrate
 from automoticz.cli import test
-from automoticz.api.views import blueprint
+from automoticz.api.views import api_blueprint
+from automoticz.api.views import oauth2_blueprint
 from automoticz.utils.constants import ENV
 
 
@@ -44,7 +45,8 @@ def register_blueprints(app):
     '''
     Register blueprints for app.
     '''
-    app.register_blueprint(blueprint)
+    app.register_blueprint(api_blueprint)
+    app.register_blueprint(oauth2_blueprint)
 
 
 def create_app():

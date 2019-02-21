@@ -3,10 +3,14 @@ from flask_restplus import Api
 
 from automoticz.api.endpoints import *
 
-blueprint = Blueprint('api', __name__, url_prefix='/api')
+oauth2_blueprint = Blueprint('oauth2', __name__, url_prefix='/oauth')
+
+from automoticz.api.oauth2 import *
+
+api_blueprint = Blueprint('api', __name__, url_prefix='/api')
 
 api = Api(
-    blueprint,
+    api_blueprint,
     title='Automoticz API',
     version='1.0-dev',
     description='REST API for automoticz.')

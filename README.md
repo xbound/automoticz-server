@@ -8,18 +8,15 @@ $ pipenv install --dev
 
 ## Setting up database for local development
 
-In `settings.yaml` set `SQLALCHEMY_DATABASE_URI` for development environment, example:
-
-```yaml
-SQLALCHEMY_DATABASE_URI: "sqlite:////tmp/db.sqlite3"
-```
-
 In project root create file `.secrets.yaml` and set following variables:
 
 ```yaml
 default:
   SECRET_KEY: <your-secret-key>
   JWT_SECRET_KEY: <your-jwt-secret-key>
+  CLIENT_SECRETS_FILE: "<path-to-client-id-file>"
+development:
+  SQLALCHEMY_DATABASE_URI: "<path-to-sqlite-db-file>"
 ```
 
 Run migration commands:

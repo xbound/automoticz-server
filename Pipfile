@@ -14,7 +14,7 @@ pdbpp = "*"
 python_version = "3.5"
 
 [packages]
-dynaconf = {extras = ["yaml"],version = "*"}
+dynaconf = {version = "*",extras = ["yaml"]}
 flask-jwt-extended = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
@@ -24,3 +24,7 @@ requests = "*"
 pymysql = "*"
 flask-restplus = "*"
 gunicorn = "*"
+google-api-python-client = "*"
+google-auth = "*"
+google-auth-httplib2 = "*"
+google-auth-oauthlib = "*"

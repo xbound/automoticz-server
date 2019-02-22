@@ -7,8 +7,9 @@ verify_ssl = true
 pylint = "*"
 yapf = "*"
 pytest = "*"
-automoticz = {path = ".",editable = true}
+automoticz = {editable = true,path = "."}
 pdbpp = "*"
+flask-shell-ipython = "*"
 
 [requires]
 python_version = "3.5"

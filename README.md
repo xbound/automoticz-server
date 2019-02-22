@@ -17,7 +17,6 @@ default:
   CLIENT_SECRETS_FILE: "<path-to-client-id-file>"
 development:
   SQLALCHEMY_DATABASE_URI: "<path-to-sqlite-db-file>"
-  REDIRECT_URL: "http://127.0.0.1/oauth/callback"
 ```
 
 Run migration commands:

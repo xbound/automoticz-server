@@ -3,7 +3,7 @@ from flask_restplus import Api
 
 from automoticz.api.endpoints import *
 
-oauth2_blueprint = Blueprint('oauth2', __name__, url_prefix='/oauth')
+oauth2_blueprint = Blueprint('oauth2', __name__, url_prefix='/oauth2')
 
 from automoticz.api.oauth2 import *
 

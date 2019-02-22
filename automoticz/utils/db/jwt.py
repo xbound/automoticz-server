@@ -7,7 +7,7 @@ from automoticz.extensions import db
 from automoticz.models import JWToken
 
 
-def add_token_to_database(encoded_token, identity_claim):
+def add_token(encoded_token, identity_claim):
     '''
     Adds a new token to the database. It is not revoked when it is added.
 

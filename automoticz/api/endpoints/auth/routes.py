@@ -21,10 +21,10 @@ from automoticz.extensions import jwt, db
 from automoticz.models import User
 
 from automoticz.utils.constants import MESSAGE
-from automoticz.utils.database import add_new_user_if_not_exists
-from automoticz.utils.jwt import add_token_to_database
-from automoticz.utils.jwt import is_token_revoked
-from automoticz.utils.jwt import revoke_token
+from automoticz.utils.db import add_new_user_if_not_exists
+from automoticz.utils.db import add_token
+from automoticz.utils.db import is_token_revoked
+from automoticz.utils.db import revoke_token
 
 
 @jwt.user_loader_callback_loader
@@ -50,8 +50,8 @@ class Login(Resource):
         user = add_new_user_if_not_exists(data)
         access_token = create_access_token(user.id)
         refresh_token = create_refresh_token(user.id)
-        add_token_to_database(access_token, app.config.JWT_IDENTITY_CLAIM)
-        add_token_to_database(refresh_token, app.config.JWT_IDENTITY_CLAIM)
+        add_token(access_token, app.config.JWT_IDENTITY_CLAIM)
+        add_token(refresh_token, app.config.JWT_IDENTITY_CLAIM)
         return {
             'message': MESSAGE.LOGIN,
             'access_token': access_token,
@@ -71,7 +71,7 @@ class TokenRefresh(Resource):
     def post(self):
         identity = get_jwt_identity()
         new_access_token = create_access_token(identity)
-        add_token_to_database(new_access_token, app.config.JWT_IDENTITY_CLAIM)
+        add_token(new_access_token, app.config.JWT_IDENTITY_CLAIM)
         return {'message': MESSAGE.REFRESH, 'access_token': new_access_token}
 
 

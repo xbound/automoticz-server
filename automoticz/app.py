@@ -49,6 +49,14 @@ def register_blueprints(app):
     app.register_blueprint(oauth2_blueprint)
 
 
+def init_environmental_variables(app):
+    '''
+    Set environmental variables for Google OAuth2
+    '''
+    if app.config.ENV != ENV.PRODUCTION:
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+
 def create_app():
     ''' 
     Create new Flask app instance.
@@ -58,4 +66,5 @@ def create_app():
     init_extensions(app)
     register_blueprints(app)
     init_cli(app)
+    init_environmental_variables(app)
     return app

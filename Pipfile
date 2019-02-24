@@ -6,11 +6,10 @@ verify_ssl = true
 [dev-packages]
 pylint = "*"
 yapf = "*"
-pytest = "*"
-automoticz = {editable = true,path = "."}
+automoticz = {path = ".",editable = true}
 pdbpp = "*"
 flask-shell-ipython = "*"
-coverage = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.5"

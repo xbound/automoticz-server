@@ -126,3 +126,4 @@ dmypy.json
 # Google API OAuth client ID
 client-secrets.json
 # End of https://www.gitignore.io/api/python
+coverage_report_html/

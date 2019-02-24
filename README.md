@@ -19,6 +19,9 @@ development:
   SQLALCHEMY_DATABASE_URI: "<path-to-sqlite-db-file>"
 ```
 
+**NOTE**:
+Application works with [Proximity Beacon API](https://developers.google.com/beacons/proximity/guides) and generated OAuth2 Client ID is required to interact with beacons' data.
+
 Run migration commands:
 
 ```shell
@@ -40,9 +43,36 @@ After starting up server, Swagger API documentation will be available at http://
 $ pipenv run ./run.sh
 ```
 
-## Testing
+## Testing and coverage
 
 Run flask command to run pytest:
 ```shell
 $ pipenv run flask test
 ```
+
+To run pytest using:
+
+```shell
+$ pipenv run pytest
+```
+
+Switch `FLASK_ENV` from `development` to `testing` in `.env` file.
+
+Run coverage:
+
+```shell
+$ pipenv run coverage run -m pytest
+```
+
+Get report:
+
+```shell
+$ pipenv run coverage report
+```
+
+Get report in html:
+
+```shell
+$ pipenv run coverage html
+```
+

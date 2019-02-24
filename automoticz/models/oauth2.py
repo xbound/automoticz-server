@@ -33,7 +33,6 @@ class OAuth2Scope(db.Model):
         :param scope: str - scope name
         :return: OAuth2Scope object
         '''
-        import pdb; pdb.set_trace()
         scopes = {row.scope: row for row in cls.query.all()}
         if not scope in scopes.keys():
             return cls(scope=scope)

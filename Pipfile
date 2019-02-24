@@ -10,6 +10,7 @@ pytest = "*"
 automoticz = {editable = true,path = "."}
 pdbpp = "*"
 flask-shell-ipython = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.5"

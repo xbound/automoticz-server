@@ -8,18 +8,15 @@ from google_auth_oauthlib import flow
 from googleapiclient import discovery
 
 from automoticz.api.views import oauth2_blueprint
-from automoticz.utils.db import add_oauth2_credentials 
-
-API_NAME = 'proximitybeacon'
-API_VERSION = 'v1beta1'
-SCOPES = ['https://www.googleapis.com/auth/userlocation.beacon.registry']
+from automoticz.utils.db import add_oauth2_credentials
+from automoticz.utils.constants import OAUTH2
 
 
 @oauth2_blueprint.route('/authorize')
 def authorize():
     auth_flow = flow.Flow.from_client_secrets_file(
         app.config.CLIENT_SECRETS_FILE,
-        scopes=SCOPES,
+        scopes=OAUTH2.SCOPES,
     )
     auth_flow.redirect_uri = url_for('oauth2.callback', _external=True)
     authorization_url, state = auth_flow.authorization_url(
@@ -35,7 +32,7 @@ def callback():
     state = session['state']
     auth_flow = flow.Flow.from_client_secrets_file(
         app.config.CLIENT_SECRETS_FILE,
-        scopes=SCOPES,
+        scopes=OAUTH2.SCOPES,
         state=state
     )
     auth_flow.redirect_uri = url_for('oauth2.callback', _external=True)

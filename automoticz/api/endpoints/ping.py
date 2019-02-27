@@ -17,6 +17,6 @@ class Ping(Resource):
         _id = session.get('__ID__')
         if _id:
             return OAuth2Credential.query.filter_by(
-                client_id=_id
+                id=_id
             ).first().to_dict(), 200
         return {'status': 'OK'}, 200

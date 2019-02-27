@@ -9,6 +9,7 @@ from googleapiclient import discovery
 
 from automoticz.api.views import oauth2_blueprint
 from automoticz.utils.db import add_oauth2_credentials
+from automoticz.utils.db import get_default_credentials
 from automoticz.utils.constants import OAUTH2
 
 
@@ -45,7 +46,7 @@ def callback():
     # ACTION ITEM: In a production app, you likely want to save these
     #              credentials in a persistent database instead.
     credentials = auth_flow.credentials
-    add_oauth2_credentials(credentials)
-    session['__ID__'] = credentials.client_id
+    oauth2_credentials = add_oauth2_credentials(credentials)
+    session['__ID__'] = oauth2_credentials.id
     return redirect(url_for('api.ping_ping'))
 

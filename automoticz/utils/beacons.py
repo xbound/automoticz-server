@@ -11,7 +11,8 @@ class BeaconAPI:
 
     def __init__(self, app=None, credentials=None):
         self.init_app(app)
-        self.init_api(credentials)
+        if credentials:
+            self.init_api(credentials)
         if app is not None:
             self.init_app(app)
 

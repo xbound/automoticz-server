@@ -99,11 +99,11 @@ class OAuth2Credential(db.Model):
         :return: google.oauth2.credentials.Credentials object
         '''
         data = {
+            'token': self.token,
+            'refresh_token': self.refresh_token,
             'token_uri': self.token_uri,
             'client_id': self.client_id,
             'client_secret': self.client_secret,
-            'token': self.token,
-            'refresh_token': self.refresh_token,
             'scopes': [s.scope for s in self.scopes]
         }
         return Credentials(**data)
@@ -117,3 +117,7 @@ class OAuth2Credential(db.Model):
             'refresh_token': self.refresh_token,
             'scopes': [s.scope for s in self.scopes]
         }
+
+    
+    def __repr__(self):
+        return self.to_dict()

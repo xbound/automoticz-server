@@ -1,5 +1,4 @@
 import click
-from flask import current_app as app
 from flask.cli import FlaskGroup
 from automoticz.app import create_app
 

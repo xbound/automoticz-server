@@ -7,7 +7,7 @@ from automoticz.extensions import db
 from automoticz.extensions import jwt
 from automoticz.extensions import ma
 from automoticz.extensions import migrate
-from automoticz.extensions import beacons
+from automoticz.extensions import beaconapi
 from automoticz.cli import test
 from automoticz.api.views import api_blueprint
 from automoticz.api.views import oauth2_blueprint
@@ -33,7 +33,7 @@ def init_extensions(app):
             db.create_all()
     jwt.init_app(app)
     ma.init_app(app)
-    beacons.init_app(app)
+    beaconapi.init_app(app)
 
 
 def init_cli(app):

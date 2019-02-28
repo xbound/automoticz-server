@@ -4,7 +4,7 @@ from automoticz.utils.constants import OAUTH2
 from googleapiclient import discovery
 
 
-class BeaconAPI:
+class ProximityBeaconAPI:
     '''
     Simple Flask extension for accessing Google Proxmity Beacon API.
     '''
@@ -30,7 +30,7 @@ class BeaconAPI:
         :return: bool
         '''
         ctx = _app_ctx_stack.top
-        return hasattr(ctx, 'beacons')
+        return hasattr(ctx, 'proximitybeaconapi')
 
     def init_api(self, credentials):
         ''' Initialize Proximity Beacon API
@@ -42,8 +42,8 @@ class BeaconAPI:
         ctx = _app_ctx_stack.top
         if ctx is not None:
             if not hasattr(ctx, 'beacons'):
-                ctx.beacons = proximitybeaconapi.beacons()
+                ctx.proximitybeaconapi = proximitybeaconapi
 
     def __getattr__(self, name):
         ctx = _app_ctx_stack.top
-        return getattr(ctx.beacons, name)
+        return getattr(ctx.proximitybeaconapi, name)

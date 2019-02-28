@@ -70,26 +70,16 @@ class OAuth2Credential(db.Model):
         refresh_token = credentials.refresh_token
         client_secret = credentials.client_secret
         token_uri = credentials.token_uri
-        oauth2_credential = OAuth2Credential.query.filter_by(
-            client_id=client_id).first()
         oauth2_scopes = [OAuth2Scope.from_scope(scope) for scope in scopes]
-        if not oauth2_credential:
-            oauth2_credential = OAuth2Credential(
-                client_id=client_id,
-                token_uri=credentials.token_uri,
-                client_secret=credentials.client_secret,
-                token=credentials.token,
-                refresh_token=credentials.refresh_token)
-            for oauth2_scope in oauth2_scopes:
-                oauth2_credential.scopes.append(oauth2_scope)
-        else:
-            oauth2_credential.token_uri = token_uri
-            oauth2_credential.token = token
-            oauth2_credential.refresh_token = refresh_token
-            oauth2_credential.client_secret = client_secret
-            for oauth2_scope in oauth2_scopes:
-                if oauth2_scope in oauth2_credential.scopes:
-                    oauth2_credential.scopes.append(oauth2_scope)
+        oauth2_credential = OAuth2Credential(
+            client_id=client_id,
+            token_uri=credentials.token_uri,
+            client_secret=credentials.client_secret,
+            token=credentials.token,
+            refresh_token=credentials.refresh_token
+        )
+        for oauth2_scope in oauth2_scopes:
+            oauth2_credential.scopes.append(oauth2_scope)
         return oauth2_credential
 
     def get_creds(self):
@@ -118,6 +108,5 @@ class OAuth2Credential(db.Model):
             'scopes': [s.scope for s in self.scopes]
         }
 
-    
     def __repr__(self):
-        return self.to_dict()
+        return str(self.to_dict())

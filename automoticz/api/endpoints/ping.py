@@ -14,9 +14,4 @@ class Ping(Resource):
     '''
 
     def get(self):
-        _id = session.get('__ID__')
-        if _id:
-            return OAuth2Credential.query.filter_by(
-                id=_id
-            ).first().to_dict(), 200
         return {'status': 'OK'}, 200

@@ -17,3 +17,4 @@ api = Api(
 
 api.add_namespace(ping_namespace, path='/ping')
 api.add_namespace(auth_namespace, path='/auth')
+api.add_namespace(activate_namespace, path='/activate')

@@ -48,5 +48,5 @@ def callback():
     credentials = auth_flow.credentials
     oauth2_credentials = add_oauth2_credentials(credentials)
     session['__ID__'] = oauth2_credentials.id
-    return redirect(url_for('api.ping_ping'))
+    return redirect(url_for('api.activate_activate'))
 

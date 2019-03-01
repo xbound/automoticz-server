@@ -1,13 +1,21 @@
 from automoticz.extensions import db
+from sqlalchemy.ext.declarative import declared_attr
 
 
-class User(db.Model):
+class TokenMixin:
+
+    @declared_attr
+    def tokens(cls):
+        return db.relationship('JWToken', backref='user', lazy='dynamic')
+
+
+class User(TokenMixin, db.Model):
     ''' 
     Model for storing data about user.
     '''
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(30), unique=True, nullable=False)
-    tokens = db.relationship('JWToken', backref='user', lazy='dynamic')
+    is_admin = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return str(dict(id=self.id, username=self.username))

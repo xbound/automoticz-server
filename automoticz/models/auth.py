@@ -36,6 +36,7 @@ class Device(TokenMixin, db.Model):
     manufacturer = db.Column(db.String(50), nullable=True)
     product = db.Column(db.String(100), nullable=True)
 
+
 class JWToken(db.Model):
     '''
     Model for storing JWT authorization tokens.

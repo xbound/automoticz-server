@@ -1,5 +1,5 @@
 from automoticz.extensions import db
-from automoticz.models import OAuth2Credential
+from automoticz.models import OAuth2Credentials
 from automoticz.models import OAuth2Scope
 
 
@@ -10,11 +10,11 @@ def add_oauth2_credentials(credentials):
     :param credentials: google.oauth2.credentials.Credentials object
     :return: OAuth2Credential object 
     '''
-    oauth2_credentials = OAuth2Credential.query.filter_by(
+    oauth2_credentials = OAuth2Credentials.query.filter_by(
         client_id=credentials.client_id).first()
     model_updated = False
     if not oauth2_credentials:
-        oauth2_credentials = OAuth2Credential.from_creds(credentials)
+        oauth2_credentials = OAuth2Credentials.from_creds(credentials)
         db.session.add(oauth2_credentials)
         model_updated = True
     else:
@@ -37,8 +37,8 @@ def get_default_credentials():
 
     :return: google.oauth2.credentials.Credentials object
     '''
-    oauth2_credentials = OAuth2Credential.query.filter(
-        OAuth2Credential.refresh_token.isnot(None)).first()
+    oauth2_credentials = OAuth2Credentials.query.filter(
+        OAuth2Credentials.refresh_token.isnot(None)).first()
     if not oauth2_credentials:
         return None
     return oauth2_credentials.get_creds()

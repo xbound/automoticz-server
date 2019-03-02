@@ -39,7 +39,7 @@ class OAuth2Scope(db.Model):
         return scopes[scope]
 
 
-class OAuth2Credential(db.Model):
+class OAuth2Credentials(db.Model):
     '''
     Google OAuth2 credentials for accessing Proximity Beacon API
     '''
@@ -71,7 +71,7 @@ class OAuth2Credential(db.Model):
         client_secret = credentials.client_secret
         token_uri = credentials.token_uri
         oauth2_scopes = [OAuth2Scope.from_scope(scope) for scope in scopes]
-        oauth2_credential = OAuth2Credential(
+        oauth2_credential = OAuth2Credentials(
             client_id=client_id,
             token_uri=credentials.token_uri,
             client_secret=credentials.client_secret,

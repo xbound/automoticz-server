@@ -2,13 +2,7 @@ from automoticz.extensions import db
 from sqlalchemy.ext.declarative import declared_attr
 
 
-class TokenMixin:
-    @declared_attr
-    def tokens(cls):
-        return db.relationship('JWToken', backref='identity', lazy='dynamic')
-
-
-class User(TokenMixin, db.Model):
+class User(db.Model):
     ''' 
     Model for storing data about user.
     '''
@@ -18,12 +12,13 @@ class User(TokenMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(30), unique=True, nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+    tokens = db.relationship('JWToken', backref='user', lazy='dynamic')
 
     def __repr__(self):
         return str(dict(id=self.id, username=self.username))
 
 
-class Device(TokenMixin, db.Model):
+class Device(db.Model):
     '''
     Model for storing data about devices
     '''
@@ -35,6 +30,7 @@ class Device(TokenMixin, db.Model):
     brand = db.Column(db.String(50), nullable=True)
     manufacturer = db.Column(db.String(50), nullable=True)
     product = db.Column(db.String(100), nullable=True)
+    tokens = db.relationship('JWToken', backref='device', lazy='dynamic')
 
 
 class JWToken(db.Model):
@@ -48,6 +44,7 @@ class JWToken(db.Model):
     jti = db.Column(db.String(36), nullable=False, unique=True)
     token_type = db.Column(db.String(10), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    device_id = db.Column(db.Integer, db.ForeignKey('devices.id'), nullable=True)
     expires = db.Column(db.DateTime, nullable=False)
     revoked = db.Column(db.Boolean, nullable=False)
 

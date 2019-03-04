@@ -15,6 +15,7 @@ default:
   SECRET_KEY: <your-secret-key>
   JWT_SECRET_KEY: <your-jwt-secret-key>
   CLIENT_SECRETS_FILE: "<path-to-client-id-file>"
+  PROJECT_ID: "<project-id>"
 development:
   SQLALCHEMY_DATABASE_URI: "<path-to-sqlite-db-file>"
 ```

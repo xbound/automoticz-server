@@ -15,3 +15,18 @@ def test():
         '--cov=automoticz',
         'tests/'
     ])
+
+@click.command()
+def reset_migrations():
+    '''
+    Reset database migrations.
+    '''
+    subprocess.run([
+        'rm',
+        '-rf',
+        'migrations/'
+    ])
+    subprocess.run([
+        'rm',
+        'db.sqlite3',
+    ])

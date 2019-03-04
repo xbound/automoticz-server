@@ -9,6 +9,7 @@ from automoticz.extensions import ma
 from automoticz.extensions import migrate
 from automoticz.extensions import beaconapi
 from automoticz.cli import test
+from automoticz.cli import reset_migrations
 from automoticz.api.views import api_blueprint
 from automoticz.api.views import oauth2_blueprint
 from automoticz.utils.constants import ENV
@@ -41,6 +42,7 @@ def init_cli(app):
     Initialize cli commands.
     '''
     app.cli.add_command(test)
+    app.cli.add_command(reset_migrations)
 
 
 def register_blueprints(app):

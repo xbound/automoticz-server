@@ -1,9 +1,7 @@
-from .ping import ping_namespace
 from .auth import auth_namespace
-from .activate import activate_namespace
+from .maintanance import maintanance_namespace
 
 __all__ = [
-    'ping_namespace',
+    'maintanance_namespace',
     'auth_namespace',
-    'activate_namespace',
 ]

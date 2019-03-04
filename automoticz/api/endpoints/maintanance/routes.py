@@ -1,15 +1,22 @@
-from flask import session
-from flask_restplus import Namespace, Resource
-
+from flask_restplus import Resource
+from . import maintanance_namespace
+from automoticz.models import OAuth2Credentials
 from automoticz.utils.constants import MESSAGE
 from automoticz.extensions import beaconapi
 from automoticz.utils.db import get_default_credentials
 
-activate_namespace = Namespace(
-    'activate', description='Endpoint for initializing Proximity Beacon API.')
+
+@maintanance_namespace.route('/ping')
+class Ping(Resource):
+    '''
+    Ping endpoint.
+    '''
+
+    def get(self):
+        return {'status': 'OK'}, 200
 
 
-@activate_namespace.route('')
+@maintanance_namespace.route('/activate')
 class Activate(Resource):
     '''
     Proximity Beacon API initialization endpoint.

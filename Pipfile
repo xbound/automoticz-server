@@ -10,6 +10,7 @@ automoticz = {path = ".",editable = true}
 pdbpp = "*"
 flask-shell-ipython = "*"
 pytest-cov = "*"
+rope = "*"
 
 [requires]
 python_version = "3.5"

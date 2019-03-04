@@ -1,15 +1,15 @@
 from flask_jwt_extended import get_jti, decode_token
 
 from automoticz.models import User, JWToken
-from automoticz.utils.db import add_token
+from automoticz.utils.db import add_user_token
 from automoticz.utils.db import is_token_revoked
-from automoticz.utils.db import revoke_token
+from automoticz.utils.db import revoke_user_token
 
 
 def test_add_token_to_database(app, access_token, refresh_token):
     with app.app_context():
-        add_token(access_token, app.config.JWT_IDENTITY_CLAIM)
-        add_token(refresh_token, app.config.JWT_IDENTITY_CLAIM)
+        add_user_token(access_token, app.config.JWT_IDENTITY_CLAIM)
+        add_user_token(refresh_token, app.config.JWT_IDENTITY_CLAIM)
 
         access_token_jti = get_jti(access_token)
         refresh_token_jti = get_jti(refresh_token)
@@ -22,14 +22,14 @@ def test_add_token_to_database(app, access_token, refresh_token):
 
 def test_revoke_token(app, user, access_token, refresh_token):
     with app.app_context():
-        add_token(access_token, app.config.JWT_IDENTITY_CLAIM)
-        add_token(refresh_token, app.config.JWT_IDENTITY_CLAIM)
+        add_user_token(access_token, app.config.JWT_IDENTITY_CLAIM)
+        add_user_token(refresh_token, app.config.JWT_IDENTITY_CLAIM)
 
         access_token_jti = get_jti(access_token)
         refresh_token_jti = get_jti(refresh_token)
 
-        revoke_token(access_token_jti, user.id)
-        revoke_token(refresh_token_jti, user.id)
+        revoke_user_token(access_token_jti, user.id)
+        revoke_user_token(refresh_token_jti, user.id)
 
         is_token_revoked(decode_token(access_token))
         is_token_revoked(decode_token(refresh_token))

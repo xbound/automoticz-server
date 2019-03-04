@@ -7,7 +7,7 @@ from automoticz.extensions import db
 from automoticz.models import JWToken
 
 
-def add_token(encoded_token, identity_claim):
+def add_user_token(encoded_token, identity_claim):
     '''
     Adds a new token to the database. It is not revoked when it is added.
 
@@ -46,7 +46,7 @@ def is_token_revoked(decoded_token):
         return True
 
 
-def revoke_token(token_jti, user_id):
+def revoke_user_token(token_jti, user_id):
     '''Revokes the given token
 
     Since we use it only on logout that already require a valid access token,

@@ -1,7 +1,7 @@
 from flask_restplus import fields
 
 from automoticz.utils.constants import MESSAGE
-from automoticz.api.endpoints.auth import auth_namespace as api
+from . import auth_namespace as api
 
 # Fields
 username_field = fields.String(

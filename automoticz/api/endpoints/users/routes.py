@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required
 from flask_jwt_extended import get_raw_jwt
 from flask_jwt_extended import jwt_refresh_token_required
 
-from automoticz.api.endpoints.auth import auth_namespace as api
+from . import auth_namespace as api
 from .helpers import login_reguest
 from .helpers import login_response
 from .helpers import token_refresh_request
@@ -23,18 +23,8 @@ from automoticz.models import User
 from automoticz.utils.constants import MESSAGE
 from automoticz.utils.db import add_new_user_if_not_exists
 from automoticz.utils.db import add_user_token
-from automoticz.utils.db import is_token_revoked
 from automoticz.utils.db import revoke_user_token
 
-
-@jwt.user_loader_callback_loader
-def user_loader_callback(identity):
-    return User.query.get(identity)
-
-
-@jwt.token_in_blacklist_loader
-def check_if_token_revoked(decoded_token):
-    return is_token_revoked(decoded_token)
 
 
 @api.route('/login')

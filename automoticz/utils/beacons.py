@@ -35,9 +35,6 @@ class ProximityBeaconAPI:
         ctx = _app_ctx_stack.top
         return hasattr(ctx, 'proximitybeaconapi')
 
-    @property
-    def latest_utoken(self):
-        return self._data
 
     def init_api(self, credentials):
         ''' Initialize Proximity Beacon API
@@ -57,7 +54,7 @@ class ProximityBeaconAPI:
 
         :return: beacon name
         '''
-        if self._default_beacon_name:
+        if hasattr(self,'_default_beacon_name'):
             return self._default_beacon_name
         ctx = _app_ctx_stack.top
         query = 'property:"auth=true"'
@@ -71,7 +68,7 @@ class ProximityBeaconAPI:
 
         :return: default namespace name
         '''
-        if self._default_project_namespace:
+        if hasattr(self, '_default_project_namespace'):
             return self._default_project_namespace
         ctx = _app_ctx_stack.top
         query = {'projectId': self._project_id}
@@ -80,13 +77,14 @@ class ProximityBeaconAPI:
         self._default_project_namespace = resp['namespaces'][0]['namespaceName']
         return self._default_project_namespace
 
-    def is_utoken_set(self, beacon_name):
+    def get_utoken(self):
         ''' Checks if for beacon with given name u_token attachment
         is set.
 
         :param beacon_name: name of the beacon
         :param namespace: namespace
         '''
+        beacon_name = self.get_default_auth_beacon_name()
         ctx = _app_ctx_stack.top
         namespace = self.get_default_project_namespace().split('/')[1]
         namespaced_type = '{}/u_token'.format(namespace)
@@ -95,19 +93,31 @@ class ProximityBeaconAPI:
             'namespacedType': namespaced_type
         }
         resp = ctx.proximitybeaconapi.beacons().attachments().list(**query).execute()
-        return any(a for a in resp['attachments'] if a['namespacedType'] == namespaced_type)
+        b64_data = resp['attachments'][0]['data']
+        return self._base64_to_str(b64_data)
 
-    def unset_utoken(self, beacon_name):
+    def is_utoken_valid(self, u_token):
+        ''' Checks if recieved token is valid with current
+        u_token attachment.
+
+        :param u_token: incomming u_token
+        :return: True or False
+        '''
+        incomming_token = self._base64_to_str(u_token)
+        current_token = self.get_utoken()
+        return incomming_token == current_token
+
+
+    def unset_utoken(self):
         ''' Unsets "u_token" type attachment on authentication beacon identified
         by beacon_name.
 
         :param beacon_name: name of the beacon
         '''
+        beacon_name = self.get_default_auth_beacon_name()
         ctx = _app_ctx_stack.top
-        namespaced_type = self._namespaced_type
-        if not namespaced_type:
-            namespace = self.get_default_project_namespace().split('/')[1]
-            namespaced_type = '{}/u_token'.format(namespace)
+        namespace = self.get_default_project_namespace().split('/')[1]
+        namespaced_type = '{}/u_token'.format(namespace)
         query = {
             'beaconName': beacon_name,
             'namespacedType': namespaced_type,
@@ -117,38 +127,34 @@ class ProximityBeaconAPI:
         return resp
 
 
-    def set_utoken(self, beacon_name, u_token):
+    def set_utoken(self, u_token):
         ''' Sets "u_token" type attachment on authentication beacon identified
         by beacon_name.
 
         :param beacon_name: name of the beacon
         :param u_token: unique token
         '''
+        beacon_name = self.get_default_auth_beacon_name()
         ctx = _app_ctx_stack.top
-        u_token_bytes = str.encode(u_token)
-        namespaced_type = self._namespaced_type
-        if not namespaced_type:
-            namespace = self.get_default_project_namespace().split('/')[1]
-            namespaced_type = '{}/u_token'.format(namespace)
-        if self.is_utoken_set(beacon_name):
-            self.unset_utoken(beacon_name)
+        namespace = self.get_default_project_namespace().split('/')[1]
+        namespaced_type = '{}/u_token'.format(namespace)
+        if self.get_utoken() is not None:
+            self.unset_utoken()
         query = {
             'beaconName': beacon_name,
             'projectId': self._project_id,
             'body': {
                 'namespacedType': namespaced_type,
-                'data': base64.b64encode(u_token_bytes).decode(),
+                'data': self._str_to_base64(u_token),
             }
         }
         resp = ctx.proximitybeaconapi.beacons().attachments().create(
             **query).execute()
-        self._data = base64.b64decode(resp['data'].encode()).decode()
-        self._namespaced_type = resp.get('namespacedType')
         return resp
 
-    def __getattr__(self, name):
-        ctx = _app_ctx_stack.top
-        if hasattr(ctx.proximitybeaconapi, name):
-            return getattr(ctx.proximitybeaconapi, name)
-        else:
-            return None
+    def _base64_to_str(self, data):
+        return base64.b64decode(data.encode()).decode()
+
+    def _str_to_base64(self, data):
+        u_token_bytes = str.encode(data)
+        return base64.b64encode(u_token_bytes).decode()

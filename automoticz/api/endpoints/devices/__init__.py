@@ -1,7 +1,7 @@
 from flask_restplus import Namespace
 
 devices_namespace = Namespace(
-    'auth', description='Auth endpoint for server authentication.')
+    'devices', description='Endpoint for interaction with bluetooth devices.')
 
 from .routes import *
 

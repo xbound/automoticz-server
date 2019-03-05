@@ -1,11 +1,12 @@
-from .jwt import add_user_token
+from .jwt import add_user_token, add_device_token
 from .jwt import decode_token
-from .jwt import revoke_user_token
+from .jwt import revoke_user_token, revoke_device_token
 from .jwt import is_token_revoked
 
 from .oauth2 import add_oauth2_credentials, get_default_credentials
 
 from .user import add_new_user_if_not_exists
+from .devices import add_new_device_if_not_exists
 
 
 all = [
@@ -16,4 +17,7 @@ all = [
     'add_oauth2_credentials',
     'add_new_user_if_not_exists',
     'get_default_credentials',
+    'add_new_device_if_not_exists',
+    'add_device_token',
+    'revoke_device_token',
 ]

@@ -25,7 +25,7 @@ class Device(db.Model):
     __tablename__ = 'devices'
 
     id = db.Column(db.Integer, primary_key=True)
-    device = db.Column(db.String(50), nullable=True)
+    device = db.Column(db.String(50), nullable=False)
     model = db.Column(db.String(50), nullable=True)
     brand = db.Column(db.String(50), nullable=True)
     manufacturer = db.Column(db.String(50), nullable=True)

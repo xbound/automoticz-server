@@ -35,9 +35,9 @@ class Register(Resource):
     def post(self):
         data = api.payload
         u_token = data.pop('u_token')
-        if not beaconapi.is_initialized:
-            creds = get_default_credentials()
-            beaconapi.init_api(creds)
+        # if not beaconapi.is_initialized:
+            # creds = get_default_credentials()
+            # beaconapi.init_api(creds)
         if not beaconapi.is_utoken_valid(u_token):
             return {'message': MESSAGE.INVALID_UTOKEN}
         device = add_new_device_if_not_exists(data)

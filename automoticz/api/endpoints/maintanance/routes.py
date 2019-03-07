@@ -40,7 +40,7 @@ class Activate(Resource):
         if not beaconapi.is_initialized:
             creds = get_default_credentials()
             beaconapi.init_api(creds)
-        return beaconapi.beacons().list().execute()
+        return {'status': 'OK'}
 
 
 @maintanance_namespace.route('/systime')

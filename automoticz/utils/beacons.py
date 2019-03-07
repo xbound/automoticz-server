@@ -45,7 +45,7 @@ class ProximityBeaconAPI:
             OAUTH2.API_NAME, OAUTH2.API_VERSION, credentials=credentials)
         ctx = _app_ctx_stack.top
         if ctx is not None:
-            if not hasattr(ctx, 'beacons'):
+            if not hasattr(ctx, 'proximitybeaconapi'):
                 ctx.proximitybeaconapi = proximitybeaconapi
 
     def get_default_auth_beacon_name(self):

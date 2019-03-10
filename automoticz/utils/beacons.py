@@ -26,15 +26,15 @@ class ProximityBeaconAPI:
         self._project_id = app.config.PROJECT_ID
 
     @property
-    def is_initialized(self):
+    def api(self):
         '''
-        Checks if Proximity Beacon API is initialized.
+        If is initialized returns Google API client instance.
 
         :return: bool
         '''
-        ctx = _app_ctx_stack.top
-        return hasattr(ctx, 'proximitybeaconapi')
-
+        if not hasattr(self, 'app'):
+            return None
+        return self.app.extensions.get('api')
 
     def init_api(self, credentials):
         ''' Initialize Proximity Beacon API
@@ -43,10 +43,7 @@ class ProximityBeaconAPI:
         '''
         proximitybeaconapi = discovery.build(
             OAUTH2.API_NAME, OAUTH2.API_VERSION, credentials=credentials)
-        ctx = _app_ctx_stack.top
-        if ctx is not None:
-            if not hasattr(ctx, 'proximitybeaconapi'):
-                ctx.proximitybeaconapi = proximitybeaconapi
+        self.app.extensions['api'] = proximitybeaconapi
 
     def get_default_auth_beacon_name(self):
         ''' Returns name of the beacon which property "auth" is set to 
@@ -54,11 +51,11 @@ class ProximityBeaconAPI:
 
         :return: beacon name
         '''
-        if hasattr(self,'_default_beacon_name'):
+        if hasattr(self, '_default_beacon_name'):
             return self._default_beacon_name
-        ctx = _app_ctx_stack.top
-        query = 'property:"auth=true"'
-        response = ctx.proximitybeaconapi.beacons().list(q=query).execute()
+        api = self.app.extensions.get('api')
+        query = 'status:active'
+        response = api.beacons().list(q=query).execute()
         # Caching variable
         self._default_beacon_name = response['beacons'][0]['beaconName']
         return self._default_beacon_name
@@ -70,14 +67,15 @@ class ProximityBeaconAPI:
         '''
         if hasattr(self, '_default_project_namespace'):
             return self._default_project_namespace
-        ctx = _app_ctx_stack.top
+        api = self.app.extensions.get('api')
         query = {'projectId': self._project_id}
-        resp = ctx.proximitybeaconapi.namespaces().list(**query).execute()
+        resp = api.namespaces().list(**query).execute()
         # Caching variable
-        self._default_project_namespace = resp['namespaces'][0]['namespaceName']
+        self._default_project_namespace = resp['namespaces'][0][
+            'namespaceName']
         return self._default_project_namespace
 
-    def get_utoken(self):
+    def get_pin(self):
         ''' Checks if for beacon with given name u_token attachment
         is set.
 
@@ -85,76 +83,72 @@ class ProximityBeaconAPI:
         :param namespace: namespace
         '''
         beacon_name = self.get_default_auth_beacon_name()
-        ctx = _app_ctx_stack.top
+        api = self.app.extensions.get('api')
         namespace = self.get_default_project_namespace().split('/')[1]
-        namespaced_type = '{}/u_token'.format(namespace)
-        query = {
-            'beaconName': beacon_name,
-            'namespacedType': namespaced_type
-        }
-        resp = ctx.proximitybeaconapi.beacons().attachments().list(**query).execute()
+        namespaced_type = '{}/pin'.format(namespace)
+        query = {'beaconName': beacon_name, 'namespacedType': namespaced_type}
+        resp = api.beacons().attachments().list(**query).execute()
         b64_data = resp['attachments'][0]['data']
         return self._base64_to_str(b64_data)
 
-    def is_utoken_valid(self, u_token):
+    def is_pin_valid(self, pin):
         ''' Checks if recieved token is valid with current
         u_token attachment.
 
-        :param u_token: incomming u_token
+        :param pin: incomming u_token
         :return: True or False
         '''
-        incomming_token = self._base64_to_str(u_token)
-        current_token = self.get_utoken()
-        return incomming_token == current_token
+        request_pin = self._base64_to_str(pin)
+        current_pin = self.get_pin()
+        return request_pin == current_pin
 
-
-    def unset_utoken(self):
-        ''' Unsets "u_token" type attachment on authentication beacon identified
+    def unset_pin(self):
+        ''' Unsets "pin" type attachment on authentication beacon identified
         by beacon_name.
-
-        :param beacon_name: name of the beacon
         '''
         beacon_name = self.get_default_auth_beacon_name()
-        ctx = _app_ctx_stack.top
+        api = self.app.extensions.get('api')
         namespace = self.get_default_project_namespace().split('/')[1]
         namespaced_type = '{}/u_token'.format(namespace)
         query = {
             'beaconName': beacon_name,
             'namespacedType': namespaced_type,
         }
-        resp = ctx.proximitybeaconapi.beacons().attachments().batchDelete(
-            **query).execute()
+        resp = api.beacons().attachments().batchDelete(**query).execute()
         return resp
 
-
-    def set_utoken(self, u_token):
+    def set_pin(self, pin):
         ''' Sets "u_token" type attachment on authentication beacon identified
         by beacon_name.
 
-        :param beacon_name: name of the beacon
-        :param u_token: unique token
+        :param pin: unique token
         '''
         beacon_name = self.get_default_auth_beacon_name()
-        ctx = _app_ctx_stack.top
+        api = self.app.extensions.get('api')
         namespace = self.get_default_project_namespace().split('/')[1]
-        namespaced_type = '{}/u_token'.format(namespace)
-        if self.get_utoken() is not None:
-            self.unset_utoken()
+        namespaced_type = '{}/pin'.format(namespace)
+        if self.get_pin() is not None:
+            self.unset_pin()
         query = {
             'beaconName': beacon_name,
             'projectId': self._project_id,
             'body': {
                 'namespacedType': namespaced_type,
-                'data': self._str_to_base64(u_token),
+                'data': self._str_to_base64(pin),
             }
         }
-        resp = ctx.proximitybeaconapi.beacons().attachments().create(
-            **query).execute()
+        resp = api.beacons().attachments().create(**query).execute()
         return resp
 
     def _base64_to_str(self, data):
+        '''
+        Encode string data to base64 string.
+        '''
         return base64.b64decode(data.encode()).decode()
 
     def _str_to_base64(self, data):
+        '''
+        Decode base64 string to Python string.
+        '''
         u_token_bytes = str.encode(data)
         return base64.b64encode(u_token_bytes).decode()

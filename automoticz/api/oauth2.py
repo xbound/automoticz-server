@@ -3,9 +3,7 @@ from flask import session
 from flask import redirect
 from flask import request
 from flask import url_for
-from google.oauth2 import credentials
 from google_auth_oauthlib import flow
-from googleapiclient import discovery
 
 from automoticz.api.views import oauth2_blueprint
 from automoticz.utils.db import add_oauth2_credentials
@@ -47,6 +45,5 @@ def callback():
     #              credentials in a persistent database instead.
     credentials = auth_flow.credentials
     oauth2_credentials = add_oauth2_credentials(credentials)
-    session['__ID__'] = oauth2_credentials.id
     return redirect(url_for('api.maintanance_activate'))
 

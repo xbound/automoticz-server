@@ -937,7 +937,8 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.0.0'
 }
 ```
-This will download Nearby Messages API, Retrofit Java REST API Client, ButterKnife for binding views in activities and UI libraries. As we will be using smartphone's Bluetooth we will need to enable permissions for our app in `AndroidManifest.xml` file:
+
+This will include Nearby Messages API, Retrofit Java REST API Client, ButterKnife for binding views in activities and UI libraries into the project. As we will be using smartphone's Bluetooth we need to enable permissions for our app in `AndroidManifest.xml` file:
 
 ```xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -959,7 +960,7 @@ This will download Nearby Messages API, Retrofit Java REST API Client, ButterKni
      ...
 
 ```
-We will also need add API key generated in earlier Project's Dashboard for Nearby Messages API in `<application>` body:
+We also need to add API key generated in earlier Project's Dashboard for Nearby Messages API in `<application>` body:
 ```xml
 <application
         android:allowBackup="true"
@@ -971,7 +972,7 @@ We will also need add API key generated in earlier Project's Dashboard for Nearb
         <meta-data
             android:name="com.google.android.nearby.messages.API_KEY"
             android:value="<your-generated-api-key>" />
-        
+
         ...
 ```
 Now sync gradle project. Next, we will add views to `activity_main.xml` file in `app/src/main/res/layout`:
@@ -1070,7 +1071,7 @@ Now sync gradle project. Next, we will add views to `activity_main.xml` file in 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 ```
-Now in Java src folder let's create directory called `api`. Here we will store utility classes that will interact with authentication server's REST API. In `api` directory let's create file called `RestApiClient.java` and declare client's interface.
+Now in `src/main/java/` folder let's create directory called `api`. Here we will store utility classes that will interact with authentication server's REST API. In `api` directory let's create file called `RestApiClient.java` and declare client's interface.
 ```java
 package com.s14075.automoticzapp.api;
 
@@ -1097,6 +1098,7 @@ public interface RestApiClient {
 Now in `api` directory create subfolders `requests` and `responses` where we will declare models that Retrofit will as serializers for incoming and ongoing data.
 For `login` enpoint we will create `LoginRequest.java` file in `requests` directory and `LoginResponse.java` in `responses` directory.
 `LoginRequest.java`:
+
 ```java
 package com.s14075.automoticzapp.api.requests;
 
@@ -1489,4 +1491,100 @@ protected void onCreate(Bundle savedInstanceState) {
 }
 ```
 
-In listener's `onFound` method we are saving attachemnts under certain keys depending on type of that attachment in `SharedPreferences` if we have enough all required attachments (`url` and `pin`) than we hide loading spinner and display login button to user.
+In listener's `onFound` method we are saving attachemnts under certain keys depending on type of that attachment in `SharedPreferences` if we have enough all required attachments (`url` and `pin`) than we hide loading spinner and display login button to user. Now let's add `onClick` method to login button that will send login request to auuthentication server:
+
+```java
+ @OnClick(R.id.loginButton)
+public void onLoginButtonClick() {
+    if (!LOGGED) {
+        login();
+    }
+}
+
+public AutomoticzClient getApiClient() {
+    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+    String apiKey = "pin";
+    String apiUrl = sp.getString(apiKey, "");
+    return RestApiFactory.getClient(apiUrl);
+}
+
+public void login() {
+    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+    String pin = sp.getString("pin", null);
+    String manufacturer = Build.MANUFACTURER;
+    String device = Build.DEVICE;
+    String model = Build.MODEL;
+    String product = Build.PRODUCT;
+    pin = Base64.encodeToString(pin.getBytes(), Base64.DEFAULT);
+    LoginRequest request = new LoginRequest(
+            pin, manufacturer, product, model, device
+    );
+    AutomoticzClient client = getApiClient();
+    Call<LoginResponse> tokens = client.login(request);
+    tokens.enqueue(new Callback<LoginResponse>() {
+        @Override
+        public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+            if (response.isSuccessful()) {
+                LoginResponse resp = response.body();
+                RestApiFactory.saveAccessToken(resp.getAccessToken(), sp);
+                LOGGED = true;
+                loginButton.setText("GET TIME");
+            } else {
+                Toast.makeText(MainActivity.this, response.message(), Toast.LENGTH_SHORT).show();
+            }
+            hideLoadingStatus();
+        }
+
+        @Override
+        public void onFailure(Call<LoginResponse> call, Throwable t) {
+            Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+            hideLoadingStatus();
+        }
+    });
+    showLoadingStatus();
+}
+```
+If login/registration process was successsful than we change state of `LOGGED` variable to `true` and save recieved access token in `Sharedpreferences` with. After user is logged in we can fetch server's system time.
+
+```java
+
+// Modify onClick button for login button
+@OnClick(R.id.loginButton)
+public void onLoginButtonClick() {
+    if (!LOGGED) {
+        login();
+    } else  {
+        getServerSystemTime();
+    }
+}
+
+public void getServerSystemTime() {
+    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+    String accessToken = AutomoticzAPI.getAccessToken(sp);
+    String authHeader = "Bearer " + accessToken;
+    AutomoticzClient client = getApiClient();
+    Call<SysTimeReponse> requestCall = client.systime(authHeader);
+    requestCall.enqueue(new Callback<SysTimeReponse>() {
+        @Override
+        public void onResponse(Call<SysTimeReponse> call, Response<SysTimeReponse> response) {
+            if (response.isSuccessful()) {
+                SysTimeReponse resp = response.body();
+                sysTimeTextView.setText(resp.getTime());
+            } else {
+                Toast.makeText(MainActivity.this, response.message(), Toast.LENGTH_SHORT).show();
+            }
+            hideLoadingStatus();
+        }
+
+        @Override
+        public void onFailure(Call<SysTimeReponse> call, Throwable t) {
+            Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+            hideLoadingStatus();
+        }
+    });
+    showLoadingStatus();
+
+}
+```
+
+By clicking on "GET TIME" button we call `/systime` endpoint and if call succeeded we should see result in text view.

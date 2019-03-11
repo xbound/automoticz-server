@@ -135,7 +135,7 @@ development:
   # Database URI which will be used by SQLAlchemy to communicate
   # with database. For local development we can use sqlite3:
   # Example: "sqlite:////home/user/beacon-auth-server/db.sqlite3"
-  SQLALCHEMY_DATABASE_URI: "sqlite:////home/devaerial/Ingenerka/Source/automoticz-server/db.sqlite3"
+  SQLALCHEMY_DATABASE_URI: <database-connection-uri>
 ```
 Now download previosly set up OAuth2 Client ID and save it in root of your authentication server project under name `client_secrets.json`. Remember that path to `client_secrets.json` file should be same as in the `settings.yaml`.
 To avoid writing everything in one python file we will make use of [Blueprints](http://flask.pocoo.org/docs/1.0/blueprints/) that would add modularity to our project and allow us to brakdown code to different modules and packages. In project's root folder we will create main application `auth_server` package with `api`, `models` and `utils` subpackages.
@@ -400,10 +400,10 @@ import os
 from flask import Flask
 from dynaconf import FlaskDynaconf
 
-from automoticz.extensions import db
-from automoticz.extensions import jwt
-from automoticz.extensions import ma
-from automoticz.extensions import migrate
+from auth_server.extensions import db
+from auth_server.extensions import jwt
+from auth_server.extensions import ma
+from auth_server.extensions import migrate
 from auth_server.api.views import oauth2_blueprint
 
 
@@ -582,7 +582,7 @@ class ProximityBeaconAPI:
         beacon_name = self.get_default_auth_beacon_name()
         api = self.app.extensions.get('api')
         namespace = self.get_default_project_namespace().split('/')[1]
-        namespaced_type = '{}/u_token'.format(namespace)
+        namespaced_type = '{}/pin'.format(namespace)
         query = {
             'beaconName': beacon_name,
             'namespacedType': namespaced_type,
@@ -623,8 +623,8 @@ class ProximityBeaconAPI:
         '''
         Decode base64 string to Python string.
         '''
-        u_token_bytes = str.encode(data)
-        return base64.b64encode(u_token_bytes).decode()
+        pin_bytes = str.encode(data)
+        return base64.b64encode(pin_bytes).decode()
 ```
 Exaplanation to code above:
 In extension's class `ProximityBeaconAPI` we create `init_app` method that links it with Flask app similarly like in other extensions like `Flask-SQLAlchemy`. `init_api` method is where we initialize API client and set it in app's `extensions` dictionary. When we recieve pin (base64 encoded) from mobile app we will check its validity with `is_pin_valid` method  which fetches current pin using `get_pin` method. If it is valid we will unset current pin with `unset_pin` method and generate new pin and set it with `set_pin` method. `get_default_project_namespace` and `get_default_auth_beacon_name` are used for fetching neccessary data to construct reuquset query to Proximity Beacon API. Now we can add our extension in `extensions.py` file and initialize it in `app.py`:
@@ -647,7 +647,7 @@ beaconapi = ProximityBeaconAPI()
 `app.py`:
 ```python
 
-from automoticz.extensions import beaconapi
+from auth_server.extensions import beaconapi
 
 ...
 
@@ -688,7 +688,7 @@ refresh_token_field = fields.String(
 # Login models
 register_reguest_model = devices_namespace.model(
     'Device registration request', {
-        'u_token': fields.String(description='Base64 encoded token'),
+        'pin': fields.String(description='Base64 encoded token'),
         'device': fields.String(description='Device name'),
         'model': fields.String(description='Model name'),
         'manufacturer': fields.String(description='Manufacturer of device'),
@@ -712,16 +712,16 @@ class Register(Resource):
     @devices_namespace.marshal_with(register_response_model)
     def post(self):
         data = devices_namespace.payload
-        u_token = data.pop('u_token')
+        pin = data.pop('pin')
         if not beaconapi.api:
             beaconapi.init_api(get_default_credentials())
-        if not beaconapi.is_pin_valid(u_token):
+        if not beaconapi.is_pin_valid(pin):
             return {'message': 'PIN is invalid'}, 403
         device = add_new_device_if_not_exists(data)
         access_token = create_access_token(device.id)
         add_device_token(access_token, app.config.JWT_IDENTITY_CLAIM)
-        new_utoken = str(random.randint(1, 999999999))
-        beaconapi.set_pin(new_utoken)
+        new_pin = str(random.randint(1, 999999999))
+        beaconapi.set_pin(new_pin)
         return {
             'message': 'SUCCESS',
             'access_token': access_token,
@@ -732,7 +732,7 @@ Here we've created `Namespace` object that creates new endpoint. We also create 
 $ touch ./auth_server/models/auth.py
 ```
 ```python
-from automoticz.extensions import db
+from auth_server.extensions import db
 
 
 class Device(db.Model):
@@ -823,7 +823,7 @@ api_blueprint = Blueprint('api', __name__, url_prefix='/api')
 
 api = Api(
     api_blueprint,
-    title='Automoticz API',
+    title='Beacon authentication server',
     version='1.0-dev',
     description='REST API for beacon authentication server.')
 
@@ -831,7 +831,7 @@ api.add_namespace(devices_namespace, path='/devices')
 
 oauth2_blueprint = Blueprint('oauth2', __name__, url_prefix='/oauth2')
 
-from automoticz.api.oauth2 import *
+from auth_server.api.oauth2 import *
 ```
 Don't forget to register blueprint in `app.py`:
 `app.py`
@@ -859,9 +859,9 @@ Run server. API documentation should be available at http://127.0.0.1/api/
 $ pipenv run flask run
 ```
 
-We will also additionally create protected endpoint in `api/maintanace.py` that requires access token.
+We will also additionally create protected endpoint in `api/maintenance.py`. This endpoint expects acccess token and return current system time of server to client.
 ```shell
-$ touch ./auth_server/api/maintanace.py
+$ touch ./auth_server/api/maintenance.py
 ```
 ```python
 import time
@@ -894,7 +894,599 @@ class SysTime(Resource):
     def get(self):
         return {'time': time.strftime('%A %B, %d %Y %H:%M:%S')}
 ```
+Import endpoint's namespace to `views.py` and add to API:
+```python
+from flask import Blueprint
+from flask_restplus import Api
 
+from auth_server.api.devices import devices_namespace
+from auth_sever.api.maintanance import maintanance_namespace
+
+api_blueprint = Blueprint('api', __name__, url_prefix='/api')
+
+api = Api(
+    api_blueprint,
+    title='Beacon authentication server API',
+    version='1.0-dev',
+    description='REST API for beacon authentication server.')
+
+api.add_namespace(devices_namespace, path='/devices')
+api.add_namespace(maintanance_namespace, path='/maintanance')
+
+oauth2_blueprint = Blueprint('oauth2', __name__, url_prefix='/oauth2')
+```
 
 ## Implementing Android application
 
+After we finished backend server part we can start developing Android client. We will need Android Studio and Android SDK installed on our local development machine. Create new Android Studio Project with default configurations provided by project creator. Before we proceed with implementation we will need to include few dependencies in `build.gradle` file:
+
+```gradle
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.preference:preference:1.0.0'
+    implementation 'com.google.android.material:material:1.1.0-alpha02'
+    implementation 'com.github.ybq:Android-SpinKit:1.2.0'
+    implementation 'com.jakewharton:butterknife:10.0.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.1'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.google.android.gms:play-services-nearby:16.0.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.0.0'
+}
+```
+This will download Nearby Messages API, Retrofit Java REST API Client, ButterKnife for binding views in activities and UI libraries. As we will be using smartphone's Bluetooth we will need to enable permissions for our app in `AndroidManifest.xml` file:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.beaconauth.androidapp">
+
+
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
+     ...
+
+```
+We will also need add API key generated in earlier Project's Dashboard for Nearby Messages API in `<application>` body:
+```xml
+<application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.google.android.nearby.messages.API_KEY"
+            android:value="<your-generated-api-key>" />
+        
+        ...
+```
+Now sync gradle project. Next, we will add views to `activity_main.xml` file in `app/src/main/res/layout`:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.MainActivity">
+
+    <com.github.ybq.android.spinkit.SpinKitView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/spin_kit"
+        style="@style/SpinKitView.Large.Pulse"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        app:SpinKit_Color="@color/colorAccent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/loadingText"
+        style="@style/TextAppearance.AppCompat.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="Loading..."
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spin_kit" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_bluetooth_searching_24dp"
+        android:layout_marginEnd="24dp"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+    <Button
+        android:id="@+id/loginButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="Register"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loadingText" />
+
+    <TextView
+        android:id="@+id/urlTextView"
+        style="@style/TextAppearance.AppCompat.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="128dp"
+        android:layout_marginEnd="8dp"
+        android:text="N/A"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/sysTimeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="N/A"
+        app:layout_constraintBottom_toTopOf="@+id/spin_kit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/urlTextView" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+```
+Now in Java src folder let's create directory called `api`. Here we will store utility classes that will interact with authentication server's REST API. In `api` directory let's create file called `RestApiClient.java` and declare client's interface.
+```java
+package com.s14075.automoticzapp.api;
+
+import com.s14075.automoticzapp.api.requests.LoginRequest;
+import com.s14075.automoticzapp.api.responses.LoginResponse;
+import com.s14075.automoticzapp.api.responses.SysTimeReponse;
+
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.POST;
+
+public interface RestApiClient {
+
+    @POST("/api/devices/register")
+    Call<LoginResponse> login(@Body LoginRequest request);
+
+    @GET("/api/maintanance/systime")
+    Call<SysTimeReponse> systime(@Header("Authorization") String authHeader);
+
+}
+```
+Now in `api` directory create subfolders `requests` and `responses` where we will declare models that Retrofit will as serializers for incoming and ongoing data.
+For `login` enpoint we will create `LoginRequest.java` file in `requests` directory and `LoginResponse.java` in `responses` directory.
+`LoginRequest.java`:
+```java
+package com.s14075.automoticzapp.api.requests;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+public class LoginRequest
+{
+    @SerializedName("pin")
+    @Expose
+    private String pin;
+
+    @SerializedName("manufacturer")
+    @Expose
+    private String manufacturer;
+
+    @SerializedName("product")
+    @Expose
+    private String product;
+
+    @SerializedName("model")
+    @Expose
+    private String model;
+
+    @SerializedName("device")
+    @Expose
+    private String device;
+
+    public LoginRequest(){}
+
+
+    public LoginRequest(String pin, String manufacturer, String product, String model, String device)
+    {
+        this.pin = pin;
+        this.manufacturer = manufacturer;
+        this.product = product;
+        this.model = model;
+        this.device = device;
+    }
+
+    public String getPin() {
+        return pin;
+    }
+
+    public void setPin(String pin) {
+        this.pin = pin;
+    }
+
+    public String getManufacturer() {
+        return manufacturer;
+    }
+
+    public void setManufacturer(String manufacturer) {
+        this.manufacturer = manufacturer;
+    }
+
+    public String getProduct() {
+        return product;
+    }
+
+    public void setProduct(String product) {
+        this.product = product;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
+    }
+}
+```
+`LoginResponse.java`:
+```java
+package com.s14075.automoticzapp.api.responses;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+public class LoginResponse {
+    @SerializedName("message")
+    @Expose
+    private String message;
+
+    @SerializedName("access_token")
+    @Expose
+    private String accessToken;
+
+    public LoginResponse(String accessToken, String message) {
+        this.accessToken = accessToken;
+        this.message = message;
+    }
+
+    public LoginResponse() {
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+}
+```
+We note here that our request and response classes should be made as Java beans with empty constructor and getters and setters for fields. `@Expose` tells us that field with this annotation should be present in json body and `@SerializedName` tells us under what name that field should be serialized. For `systime` endpoint we will only need to specify response body.
+`SysTimeResponse.java`:
+```java
+package com.s14075.automoticzapp.api.responses;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+public class SysTimeReponse
+{
+    @SerializedName("time")
+    @Expose
+    private String time;
+
+    public SysTimeReponse(){}
+
+    public SysTimeReponse(String time) {
+        this.time = time;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+}
+```
+Next in `api` directory let's create `RestApiFactory.java` file that will be responsible for instance creation and  initializion of our REST client.
+`RestApiFactory.java`:
+```java
+package com.s14075.automoticzapp.api;
+
+import android.content.SharedPreferences;
+
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+public class RestApiFactory {
+    private static RestApiClient client;
+
+
+    public static RestApiClient getClient(String apiURL) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(apiURL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        return retrofit.create(RestApiClient.class);
+    }
+
+    public static String getAccessToken(SharedPreferences preferences) {
+        return preferences.getString("access_token", null);
+    }
+
+    public static void saveAccessToken(String token, SharedPreferences preferences) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("access_token", token);
+        editor.apply();
+    }
+}
+```
+In client factory we will also create method that saves access token to `SharedPreferences` and method that gets saved token from `SharedPreferences`. Now we can put everuthing together in `MainActivity.java`. We start from declaring view fields used that will be used in our activity and some constants:
+```java
+public class MainActivity extends AppCompatActivity {
+
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1045;
+    private static final int MY_PERMISSIONS_REQUEST_WIFI = 1046;
+    private static boolean LOGGED = false;
+
+    private MessageListener mMessageListener;
+
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
+
+    @BindView(R.id.spin_kit)
+    SpinKitView progressBar;
+
+    @BindView(R.id.loadingText)
+    TextView loadingText;
+
+    @BindView(R.id.urlTextView)
+    TextView urltextView;
+
+    @BindView(R.id.sysTimeTextView)
+    TextView sysTimeTextView;
+
+    @BindView(R.id.loginButton)
+    TextView loginButton;
+```
+`mMessageListener` (which we will implement in `onCreate` method later) will be responsible for processing incoming attachments from beacon. When users launches application he will see `fab` floating button. Upon clicking that button app starts scanning for nearby messages broadcasted by beacons. Here we are creating `onClick` method for button that will start scanning:
+
+```java
+// Floating button onClick listener
+@OnClick(R.id.fab)
+public void onFabClick() {
+    clearPreferences();
+    this.lookForNearbyMessages();
+}
+
+private void lookForNearbyMessages() {
+    if (canInteractWithBeacons()) {
+        this.showLoadingStatus();
+        this.subscribe();
+    }
+}
+
+private void showLoadingStatus() {
+    this.progressBar.setVisibility(View.VISIBLE);
+    this.loadingText.setVisibility(View.VISIBLE);
+}
+
+private void hideLoadingStatus() {
+    this.progressBar.setVisibility(View.INVISIBLE);
+    this.loadingText.setVisibility(View.INVISIBLE);
+}
+
+private void clearPreferences() {
+    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+    SharedPreferences.Editor editor = sp.edit();
+    String apiUrlKey = "url";
+    String pinKeyName = "pin";
+    editor.remove(apiUrlKey);
+    editor.remove(pinKeyName);
+    editor.apply();
+}
+```
+First in `onClick` methid we are resseting `url` and `pin` values saved in `SharedPreferences` if there are any. After that we check if our application has enough permissions to start monitoring for beacon's messages.
+```java
+private boolean canInteractWithBeacons() {
+        if (!isFineOrCoarseLocationPermissionGranted() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestCoarseLocationPermission();
+            return false;
+        }
+        if (!isChangeWifiStatePermissionGranted())
+            requestChangeWifiStatePermission();
+        return true;
+    }
+
+    private void requestCoarseLocationPermission() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION},
+                MY_PERMISSIONS_REQUEST_LOCATION);
+
+    }
+
+    private void requestChangeWifiStatePermission() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.CHANGE_WIFI_STATE},
+                MY_PERMISSIONS_REQUEST_WIFI);
+
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private boolean isFineOrCoarseLocationPermissionGranted() {
+        return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private boolean isChangeWifiStatePermissionGranted() {
+        return checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_LOCATION: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    lookForNearbyMessages();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Reguest refused", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+            case MY_PERMISSIONS_REQUEST_WIFI:{
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    lookForNearbyMessages();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Reguest refused", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+        }
+    }
+```
+If so we show user a loading spinner and subscibe application for beacon messages:
+
+```java
+// Subscribe to receive messages.
+private void subscribe() {
+    Log.i(LOG_TAG, "Subscribing.");
+    SubscribeOptions options = new SubscribeOptions.Builder()
+            .setStrategy(Strategy.BLE_ONLY)
+            .build();
+    Nearby.getMessagesClient(this).subscribe(mMessageListener, options);
+}
+```
+When we are leaving or closing activity we want to unsubscribe message listener in `onPause` method to avoid any memory leaks:
+
+```java
+private void unsubscribe() {
+    Nearby.getMessagesClient(this).unsubscribe(this.mMessageListener);
+}
+
+@Override
+protected void onPause() {
+    super.onPause();
+    unsubscribe();
+}
+```
+
+Now in activity's `onCreate` method we will initialize UI and message listener:
+
+```java
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    ButterKnife.bind(this);
+    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+    if (LOGGED)
+        showStatusWidgets();
+    else
+        hideStatusWidgets();
+    this.mMessageListener = new MessageListener() {
+        @Override
+        public void onFound(Message message) {
+            String apiUrlKey = "url";
+            String pinKeyName = "pin";
+            if (message.getType().equals(apiUrlKey)) {
+                if (sp.getString(apiUrlKey, null) == null) {
+                    String apiUrl = new String(message.getContent());
+                    SharedPreferences.Editor editor = sp.edit();
+                    editor.putString(apiUrlKey, apiUrl);
+                    editor.apply();
+                    Log.d(LOG_TAG, "API URL is set...");
+                }
+            } else if (message.getType().equals(pinKeyName)) {
+                if (sp.getString(pinKeyName, null) == null) {
+                    String pin = new String(message.getContent());
+                    SharedPreferences.Editor editor = sp.edit();
+                    editor.putString(pinKeyName, pin);
+                    editor.apply();
+                    Log.d(LOG_TAG, "UUID is set...");
+                }
+            }
+            Log.d(LOG_TAG, "Found message: " + new String(message.getContent()));
+            Log.d(LOG_TAG, "Found message type: " + message.getType());
+            Log.d(LOG_TAG, "Namespace: " + message.getNamespace());
+            String apiUrl = sp.getString(apiUrlKey, null);
+            String uuid = sp.getString(pinKeyName, null);
+            if (apiUrl != null && uuid != null) {
+                hideLoadingStatus();
+                showStatusWidgets();
+            }
+        }
+
+        @Override
+        public void onLost(Message message) {
+            Log.d(LOG_TAG, "Lost sight of message: " + new String(message.getContent()));
+            hideLoadingStatus();
+        }
+    };
+}
+```
+
+In listener's `onFound` method we are saving attachemnts under certain keys depending on type of that attachment in `SharedPreferences` if we have enough all required attachments (`url` and `pin`) than we hide loading spinner and display login button to user.

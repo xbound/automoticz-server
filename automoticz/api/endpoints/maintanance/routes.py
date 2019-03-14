@@ -37,9 +37,10 @@ class Activate(Resource):
     '''
 
     def get(self):
-        if not beaconapi.is_initialized:
+        if not beaconapi.api:
             creds = get_default_credentials()
             beaconapi.init_api(creds)
+        beacon_name = beaconapi.get_default_auth_beacon_name()
         return {'status': 'OK'}
 
 

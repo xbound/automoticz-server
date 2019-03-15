@@ -76,7 +76,7 @@ class ProximityBeaconAPI:
         return self._default_project_namespace
 
     def get_pin(self):
-        ''' Checks if for beacon with given name u_token attachment
+        ''' Checks if for beacon with given name pin attachment
         is set.
 
         :param beacon_name: name of the beacon
@@ -109,7 +109,7 @@ class ProximityBeaconAPI:
         beacon_name = self.get_default_auth_beacon_name()
         api = self.app.extensions.get('api')
         namespace = self.get_default_project_namespace().split('/')[1]
-        namespaced_type = '{}/u_token'.format(namespace)
+        namespaced_type = '{}/pin'.format(namespace)
         query = {
             'beaconName': beacon_name,
             'namespacedType': namespaced_type,

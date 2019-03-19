@@ -6,7 +6,7 @@ verify_ssl = true
 [dev-packages]
 pylint = "*"
 yapf = "*"
-automoticz = {path = ".",editable = true}
+automoticz = {editable = true,path = "."}
 pdbpp = "*"
 flask-shell-ipython = "*"
 pytest-cov = "*"
@@ -30,3 +30,8 @@ google-api-python-client = "*"
 google-auth = "*"
 google-auth-httplib2 = "*"
 google-auth-oauthlib = "*"
+jupyter = "*"
+numpy = "*"
+pandas = "*"
+matplotlib = "*"
+ipykernel = "*"

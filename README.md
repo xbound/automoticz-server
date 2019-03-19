@@ -16,6 +16,11 @@ default:
   JWT_SECRET_KEY: <your-jwt-secret-key>
   CLIENT_SECRETS_FILE: "<path-to-client-id-file>"
   PROJECT_ID: "<project-id>"
+  DOMOTICZ_HOST: <domoticz-host>
+  DOMOTICZ_PORT: <domoticz-port>
+  DOMOTICZ_USERNAME: <domoticz-username>
+  DOMOTICZ_PASSWORD: <domoticz-password>
+  DOMOTICZ_API_TIMEOUT: <timeout>
 development:
   SQLALCHEMY_DATABASE_URI: "<path-to-sqlite-db-file>"
 ```

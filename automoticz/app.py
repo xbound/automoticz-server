@@ -3,11 +3,7 @@ import os
 from flask import Flask
 from dynaconf import FlaskDynaconf
 
-from automoticz.extensions import db
-from automoticz.extensions import jwt
-from automoticz.extensions import ma
-from automoticz.extensions import migrate
-from automoticz.extensions import beaconapi
+from automoticz.extensions import *
 from automoticz.cli import test
 from automoticz.cli import reset_migrations
 from automoticz.api.views import api_blueprint
@@ -35,6 +31,7 @@ def init_extensions(app):
     jwt.init_app(app)
     ma.init_app(app)
     beaconapi.init_app(app)
+    domoticz.init_app(app)
 
 
 def init_cli(app):
@@ -53,12 +50,16 @@ def register_blueprints(app):
     app.register_blueprint(oauth2_blueprint)
 
 
-def init_environmental_variables(app):
+def post_init(app):
     '''
     Set environmental variables for Google OAuth2
     '''
     if app.config.ENV != ENV.PRODUCTION:
         os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+    # Surpassing warning when calling Domoticz API
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def create_app():
@@ -70,5 +71,5 @@ def create_app():
     init_extensions(app)
     register_blueprints(app)
     init_cli(app)
-    init_environmental_variables(app)
+    post_init(app)
     return app

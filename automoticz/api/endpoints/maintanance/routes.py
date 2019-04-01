@@ -6,8 +6,9 @@ from flask_jwt_extended import jwt_required
 
 from automoticz.models import OAuth2Credentials
 from automoticz.utils.constants import MESSAGE
-from automoticz.extensions import beaconapi
+from automoticz.extensions import proximity
 from automoticz.utils import get_default_credentials
+from automoticz.utils.beacons import get_default_auth_beacon_name
 
 from . import maintanance_namespace
 
@@ -37,11 +38,11 @@ class Activate(Resource):
     '''
 
     def get(self):
-        if not beaconapi.api:
+        if not proximity.api:
             creds = get_default_credentials()
             beaconapi.init_api(creds)
-        beacon_name = beaconapi.get_default_auth_beacon_name()
-        return {'status': 'OK'}
+        beacon_name = get_default_auth_beacon_name()
+        return {'status': 'OK'}, 200
 
 
 @maintanance_namespace.route('/systime')
@@ -53,4 +54,4 @@ class SysTime(Resource):
     @jwt_required
     @maintanance_namespace.marshal_with(systime_response)
     def get(self):
-        return {'time': time.strftime('%A %B, %d %Y %H:%M:%S')}
+        return {'time': time.strftime('%A %B, %d %Y %H:%M:%S')}, 200

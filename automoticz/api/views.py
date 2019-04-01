@@ -22,7 +22,7 @@ api = Api(
     version='1.0-dev',
     description='REST API for automoticz.')
 
-# api.add_namespace(maintanance_namespace, path='/maintanance')
+api.add_namespace(maintanance_namespace, path='/maintanance')
 # api.add_namespace(devices_namespace, path='/devices')
 
 

@@ -19,3 +19,12 @@ class OAUTH2:
     API_NAME = 'proximitybeacon'
     API_VERSION = 'v1beta1'
     SCOPES = ['https://www.googleapis.com/auth/userlocation.beacon.registry']
+
+
+
+class DOMOTICZ:
+    LOGS_RANGE_DAY = 'day'
+    LOGS_RANGE_MONTH = 'month'
+    LOGS_RANGE_YEAR = 'year'
+    OK_RESPONSE_STATUS = 'OK'
+    ERROR_RESPONSE_STATUS = 'ERR'

@@ -1,7 +1,7 @@
 from flask import current_app as app
 
 from automoticz.extensions import cache
-from automoticz.domoticz import CONSTANTS
+from automoticz.utils import DOMOTICZ
 
 
 @cache.cached(key_prefix='domoticz_settings')
@@ -13,6 +13,7 @@ def get_settings():
     return api.api_call({'type': 'settings'})['result']
 
 
+@cache.memoize()
 def get_user_variables(idx=None):
     '''
     Returns all user variables or returns one
@@ -37,6 +38,7 @@ def get_all_rooms():
     return api.api_call(params)['result']
 
 
+@cache.memoize()
 def get_all_devices_in_room(idx):
     '''
     Returns all devices for room specified by
@@ -49,7 +51,8 @@ def get_all_devices_in_room(idx):
     return api.api_call(params)['result']
 
 
-def get_switch_history(idx, time_range=CONSTANTS.LOGS_RANGE_DAY):
+@cache.memoize()
+def get_switch_history(idx, time_range=DOMOTICZ.LOGS_RANGE_DAY):
     '''
     Returns history of switch type device.
 
@@ -60,7 +63,8 @@ def get_switch_history(idx, time_range=CONSTANTS.LOGS_RANGE_DAY):
     return api.api_call(params)['result']
 
 
-def get_temperature_history(idx, time_range=CONSTANTS.LOGS_RANGE_DAY):
+@cache.memoize()
+def get_temperature_history(idx, time_range=DOMOTICZ.LOGS_RANGE_DAY):
     '''
     Gets temperature, humidity and pressure history from device
     with idx and given range.

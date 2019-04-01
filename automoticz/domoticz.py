@@ -4,15 +4,7 @@ import os
 from datetime import datetime
 
 import requests
-
-
-class CONSTANTS:
-    LOGS_RANGE_DAY = 'day'
-    LOGS_RANGE_MONTH = 'month'
-    LOGS_RANGE_YEAR = 'year'
-    OK_RESPONSE_STATUS = 'OK'
-    ERROR_RESPONSE_STATUS = 'ERR'
-
+from automoticz.utils import DOMOTICZ
 
 class DomoticzAPI:
     '''
@@ -59,7 +51,7 @@ class DomoticzAPI:
         url = response.url
         json_response = response.json()
         status = json_response['status']
-        if status != CONSTANTS.OK_RESPONSE_STATUS:
+        if status != DOMOTICZ.OK_RESPONSE_STATUS:
             raise requests.exceptions.RequestException(
                 'Status: {}. Request URI: {}'.format(status, url))
         return json_response

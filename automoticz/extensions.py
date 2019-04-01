@@ -13,5 +13,5 @@ cache = Cache()
 domoticz = DomoticzAPI()
 celery_app = Celery()
 
-from automoticz.utils.beacons import ProximityBeaconAPI
-beaconapi = ProximityBeaconAPI()
+from automoticz.proximity import ProximityBeaconAPI
+proximity = ProximityBeaconAPI()

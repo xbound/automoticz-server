@@ -50,9 +50,36 @@ def register_blueprints(app):
     app.register_blueprint(oauth2_blueprint)
 
 
+def init_celery(app=None):
+    '''
+    Initialize Celery instance
+    '''
+    app = app or create_app()
+    celery_app.conf.broker_url = app.config['CELERY_BROKER_URL']
+    celery_app.conf.result_backend = app.config['CELERY_RESULT_BACKEND']
+    celery_app.conf.update(app.config)
+
+    class ContextTask(celery_app.Task):
+        abstract = True
+
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery_app.Task = ContextTask
+    celery_app.conf.imports = celery_app.conf.imports + ('automoticz.tasks', )
+    celery_app.conf.task_serializer = 'json'
+    celery_app.conf.result_serializer = 'pickle'
+    celery_app.conf.accept_content = ['json', 'pickle']
+    celery_app.finalize()
+    return celery_app
+
+
 def post_init(app):
     '''
-    Set environmental variables for Google OAuth2
+    Post initialization.
+
+    Ex. for disabling warnings.
     '''
     if app.config.ENV != ENV.PRODUCTION:
         os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'

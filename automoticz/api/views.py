@@ -8,7 +8,7 @@ from automoticz.utils.constants import MESSAGE
 from automoticz.api.endpoints import *
 
 from automoticz.extensions import jwt
-from automoticz.utils.db import is_token_revoked
+from automoticz.utils import is_token_revoked
 
 oauth2_blueprint = Blueprint('oauth2', __name__, url_prefix='/oauth2')
 
@@ -22,9 +22,8 @@ api = Api(
     version='1.0-dev',
     description='REST API for automoticz.')
 
-api.add_namespace(maintanance_namespace, path='/maintanance')
-api.add_namespace(auth_namespace, path='/auth')
-api.add_namespace(devices_namespace, path='/devices')
+# api.add_namespace(maintanance_namespace, path='/maintanance')
+# api.add_namespace(devices_namespace, path='/devices')
 
 
 @jwt.token_in_blacklist_loader

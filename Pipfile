@@ -6,7 +6,6 @@ verify_ssl = true
 [dev-packages]
 pylint = "*"
 yapf = "*"
-automoticz = {editable = true,path = "."}
 pdbpp = "*"
 flask-shell-ipython = "*"
 pytest-cov = "*"
@@ -16,7 +15,7 @@ rope = "*"
 python_version = "3.5"
 
 [packages]
-dynaconf = {version = "*",extras = ["yaml"]}
+dynaconf = {extras = ["yaml"],version = "*"}
 flask-jwt-extended = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
@@ -35,3 +34,5 @@ numpy = "*"
 pandas = "*"
 matplotlib = "*"
 ipykernel = "*"
+celery = "*"
+flask-caching = "*"

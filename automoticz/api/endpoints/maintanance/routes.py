@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required
 from automoticz.models import OAuth2Credentials
 from automoticz.utils.constants import MESSAGE
 from automoticz.extensions import beaconapi
-from automoticz.utils.db import get_default_credentials
+from automoticz.utils import get_default_credentials
 
 from . import maintanance_namespace
 

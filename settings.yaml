@@ -6,6 +6,8 @@ default:
   ENCODING_FOR_DYNACONF: "utf-8"
 development:
   DEBUG: true
+  CACHE_TYPE: "simple"
+  CACHE_DEFAULT_TIMEOUT: 300
 testing:
   DEBUG: true
   SQLALCHEMY_DATABASE_URI: "sqlite:///:memory:"

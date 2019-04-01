@@ -1,14 +1,16 @@
 from flask import current_app as app
 
-from .constants import Values
+from automoticz.extensions import cache
+from automoticz.domoticz import CONSTANTS
 
 
+@cache.cached(key_prefix='domoticz_settings')
 def get_settings():
     '''
     Returns Domoticz settings. 
     '''
     api = app.extensions['domoticz']
-    return api.api_call({'type': 'settings'})
+    return api.api_call({'type': 'settings'})['result']
 
 
 def get_user_variables(idx=None):
@@ -22,16 +24,17 @@ def get_user_variables(idx=None):
     params = {'type': 'command', 'param': 'getuservariables'}
     if idx:
         params['idx'] = idx
-    return api.api_call(params)
+    return api.api_call(params)['result']
 
 
+@cache.cached(key_prefix='domoticz_all_rooms')
 def get_all_rooms():
     '''
     Returns list of all rooms.
     '''
     api = app.extensions['domoticz']
     params = {'type': 'plans', 'order': 'name', 'used': 'true'}
-    return api.api_call(params)
+    return api.api_call(params)['result']
 
 
 def get_all_devices_in_room(idx):
@@ -43,10 +46,10 @@ def get_all_devices_in_room(idx):
     '''
     api = app.extensions['domoticz']
     params = {'type': 'command', 'param': 'getplandevices', 'idx': idx}
-    return api.api_call(params)
+    return api.api_call(params)['result']
 
 
-def get_switch_history(idx, time_range=Values.LOGS_RANGE_DAY):
+def get_switch_history(idx, time_range=CONSTANTS.LOGS_RANGE_DAY):
     '''
     Returns history of switch type device.
 
@@ -54,10 +57,10 @@ def get_switch_history(idx, time_range=Values.LOGS_RANGE_DAY):
     '''
     api = app.extensions['domoticz']
     params = {'type': 'lightlog', 'idx': idx, 'range': time_range}
-    return api.api_call(params)
+    return api.api_call(params)['result']
 
 
-def get_temperature_history(idx, time_range=Values.LOGS_RANGE_DAY):
+def get_temperature_history(idx, time_range=CONSTANTS.LOGS_RANGE_DAY):
     '''
     Gets temperature, humidity and pressure history from device
     with idx and given range.
@@ -72,31 +75,33 @@ def get_temperature_history(idx, time_range=Values.LOGS_RANGE_DAY):
         'idx': idx,
         'range': time_range
     }
-    return api.api_call(params)
+    return api.api_call(params)['result']
 
 
-def get_users_data():
+@cache.cached(key_prefix='domoticz_users')
+def get_users():
     '''
     Returns user's data.
 
     :return: users' data.
     '''
     # hardcoded
-    return [
-        {
-            'idx': 1001,
-            'name': 'User 1'
-        },
-        {
-            'idx': 1002,
-            'name': 'User 2'
-        },
-        {
-            'idx': 1003,
-            'name': 'User 3'
-        },
-        {
-            'idx': 1004,
-            'name': 'User 4'
-        }
-    ]
+    api = app.extensions['domoticz']
+    params = {'type': 'users'}
+    return api.api_call(params)['result']
+
+
+@cache.cached(key_prefix='domoticz_used_devices')
+def get_used_devices():
+    '''Returns dictionary of device records.
+
+    :return: list of devices.
+    '''
+    api = app.extensions['domoticz']
+    params = {
+        'displayhidden': '1',
+        'filter': 'all',
+        'type': 'devices',
+        'used': 'all',
+    }
+    return api.api_call(params)['result']

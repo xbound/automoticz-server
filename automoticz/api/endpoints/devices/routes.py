@@ -1,27 +1,20 @@
 import random
-from flask_restplus import Resource
+
 from flask import current_app as app
-from flask_jwt_extended import create_access_token
-from flask_jwt_extended import create_refresh_token
+from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_restplus import Resource
 
-from automoticz.extensions import jwt, db, beaconapi
+from automoticz.extensions import beaconapi, db, jwt
 from automoticz.models import Device
-
+from automoticz.utils import (add_device_token, add_new_device_if_not_exists,
+                              get_default_credentials, revoke_device_token)
 from automoticz.utils.constants import MESSAGE
-from automoticz.utils.db import add_new_device_if_not_exists
-from automoticz.utils.db import add_device_token
-from automoticz.utils.db import revoke_device_token
-from automoticz.utils.db import get_default_credentials
 
 from . import devices_namespace as api
-from .helpers import register_reguest
-from .helpers import register_response
-from .helpers import token_refresh_request
-from .helpers import token_refresh_response
-from .helpers import revoke_access_request
-from .helpers import revoke_access_response
-from .helpers import revoke_refresh_request
-from .helpers import revoke_refresh_response
+from .helpers import (register_reguest, register_response,
+                      revoke_access_request, revoke_access_response,
+                      revoke_refresh_request, revoke_refresh_response,
+                      token_refresh_request, token_refresh_response)
 
 
 @api.route('/register')

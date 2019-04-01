@@ -7,44 +7,6 @@ from automoticz.extensions import db
 from automoticz.models import JWToken
 
 
-def add_user_token(encoded_token, identity_claim):
-    '''
-    Adds a new token to the database. It is not revoked when it is added.
-
-    :param identity_claim: configured key to get user identity
-    '''
-    decoded_token = decode_token(encoded_token)
-    jti = decoded_token['jti']
-    token_type = decoded_token['type']
-    user_identity = decoded_token[identity_claim]
-    expires = datetime.fromtimestamp(decoded_token['exp'])
-    revoked = False
-
-    token = JWToken(
-        jti=jti,
-        token_type=token_type,
-        user_id=user_identity,
-        expires=expires,
-        revoked=revoked,
-    )
-    db.session.add(token)
-    db.session.commit()
-
-
-def revoke_user_token(token_jti, user_id):
-    '''Revokes the given token
-
-    Since we use it only on logout that already require a valid access token,
-    if token is not found we raise an exception
-    '''
-    try:
-        token = JWToken.query.filter_by(jti=token_jti, user_id=user_id).one()
-        token.revoked = True
-        db.session.commit()
-    except NoResultFound:
-        raise Exception('Could not find the token {}'.format(token_jti))
-
-
 def add_device_token(encoded_token, identity_claim):
     '''
     Adds a new token to the database. It is not revoked when it is added.

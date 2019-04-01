@@ -1,14 +1,11 @@
 from flask import current_app as app
-from flask import session
-from flask import redirect
-from flask import request
-from flask import url_for
+from flask import redirect, request, session, url_for
 from google_auth_oauthlib import flow
 
-from automoticz.api.views import oauth2_blueprint
-from automoticz.utils.db import add_oauth2_credentials
-from automoticz.utils.db import get_default_credentials
 from automoticz.utils.constants import OAUTH2
+from automoticz.utils import add_oauth2_credentials
+
+from .views import oauth2_blueprint
 
 
 @oauth2_blueprint.route('/authorize')
@@ -30,10 +27,7 @@ def authorize():
 def callback():
     state = session['state']
     auth_flow = flow.Flow.from_client_secrets_file(
-        app.config.CLIENT_SECRETS_FILE,
-        scopes=OAUTH2.SCOPES,
-        state=state
-    )
+        app.config.CLIENT_SECRETS_FILE, scopes=OAUTH2.SCOPES, state=state)
     auth_flow.redirect_uri = url_for('oauth2.callback', _external=True)
 
     # Use the authorization server's response to fetch the OAuth 2.0 tokens.
@@ -46,4 +40,3 @@ def callback():
     credentials = auth_flow.credentials
     oauth2_credentials = add_oauth2_credentials(credentials)
     return redirect(url_for('api.maintanance_activate'))
-

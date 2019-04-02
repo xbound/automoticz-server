@@ -4,14 +4,15 @@ from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from celery import Celery
 
-from automoticz.domoticz import DomoticzAPI
 
 db = SQLAlchemy()
 jwt = JWTManager()
 migrate = Migrate()
 cache = Cache()
-domoticz = DomoticzAPI()
 celery_app = Celery()
+
+from automoticz.domoticz import DomoticzAPI
+domoticz = DomoticzAPI()
 
 from automoticz.proximity import ProximityBeaconAPI
 proximity = ProximityBeaconAPI()

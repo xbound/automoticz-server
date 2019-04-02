@@ -40,7 +40,7 @@ class Activate(Resource):
     def get(self):
         if not proximity.api:
             creds = get_default_credentials()
-            beaconapi.init_api(creds)
+            proximity.init_api(creds)
         beacon_name = get_default_auth_beacon_name()
         return {'status': 'OK'}, 200
 

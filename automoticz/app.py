@@ -29,9 +29,9 @@ def init_extensions(app):
         with app.app_context():
             db.create_all()
     jwt.init_app(app)
-    ma.init_app(app)
-    beaconapi.init_app(app)
+    proximity.init_app(app)
     domoticz.init_app(app)
+    cache.init_app(app)
 
 
 def init_cli(app):

@@ -36,11 +36,12 @@ class ProximityBeaconAPI:
             return None
         return self.app.extensions.get('proximity')
 
-    def init_api(self, credentials, use_consent=False):
+    def init_api(self, credentials):
         ''' Initialize Proximity Beacon API
 
         :param credentials: google.oauth2.credentials.Credentials object  
         '''
-        proximitybeaconapi = discovery.build(
-            OAUTH2.API_NAME, OAUTH2.API_VERSION, credentials=credentials)
-        self.app.extensions['proximity'] = proximitybeaconapi
+        if credentials:
+            proximitybeaconapi = discovery.build(
+                OAUTH2.API_NAME, OAUTH2.API_VERSION, credentials=credentials)
+            self.app.extensions['proximity'] = proximitybeaconapi

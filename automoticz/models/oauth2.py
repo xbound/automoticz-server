@@ -64,15 +64,10 @@ class OAuth2Credentials(db.Model):
         :param credentials: google.oauth2.credentials.Credentials object
         :return: OAuth2Credential object
         '''
-        client_id = credentials.client_id
         scopes = credentials.scopes
-        token = credentials.token
-        refresh_token = credentials.refresh_token
-        client_secret = credentials.client_secret
-        token_uri = credentials.token_uri
         oauth2_scopes = [OAuth2Scope.from_scope(scope) for scope in scopes]
         oauth2_credential = OAuth2Credentials(
-            client_id=client_id,
+            client_id=credentials.client_id,
             token_uri=credentials.token_uri,
             client_secret=credentials.client_secret,
             token=credentials.token,

@@ -34,9 +34,6 @@ def callback():
     authorization_response = request.url
     auth_flow.fetch_token(authorization_response=authorization_response)
 
-    # Store credentials in the session.
-    # ACTION ITEM: In a production app, you likely want to save these
-    #              credentials in a persistent database instead.
     credentials = auth_flow.credentials
     oauth2_credentials = add_oauth2_credentials(credentials)
     return redirect(url_for('api.maintanance_activate'))

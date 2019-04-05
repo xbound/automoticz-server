@@ -9,6 +9,7 @@ from automoticz.cli import reset_migrations
 from automoticz.api.views import api_blueprint
 from automoticz.api.views import oauth2_blueprint
 from automoticz.utils.constants import ENV
+from automoticz.utils.oauth2 import get_default_credentials
 
 
 def configure_app(app):
@@ -87,6 +88,11 @@ def post_init(app):
     # Surpassing warning when calling Domoticz API
     import urllib3
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+    # Initializing Proximity Beacon API
+    with app.app_context():
+        creds = get_default_credentials()
+        proximity.init_api(creds)
 
 
 def create_app():

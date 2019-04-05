@@ -13,17 +13,21 @@ class ProximityBeaconAPI:
     '''
 
     def __init__(self, app=None, credentials=None):
+        '''
+        Initialization method.
+        '''
         if app:
-            self.init_app(app)
-        if credentials:
-            self.init_api(credentials)
+            self.init_app(app, credentials)
 
-    def init_app(self, app):
+
+    def init_app(self, app, credentials=None):
         '''
         Initialize Flask app for extension
         '''
         self.app = app
         self.project_id = app.config.PROJECT_ID
+        if credentials:
+            self.init_api(credentials)
 
     @property
     def api(self):
@@ -41,7 +45,6 @@ class ProximityBeaconAPI:
 
         :param credentials: google.oauth2.credentials.Credentials object  
         '''
-        if credentials:
-            proximitybeaconapi = discovery.build(
-                OAUTH2.API_NAME, OAUTH2.API_VERSION, credentials=credentials)
-            self.app.extensions['proximity'] = proximitybeaconapi
+        proximitybeaconapi = discovery.build(
+            OAUTH2.API_NAME, OAUTH2.API_VERSION, credentials=credentials)
+        self.app.extensions['proximity'] = proximitybeaconapi

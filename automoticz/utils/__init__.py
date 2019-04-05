@@ -7,7 +7,7 @@ from .jwt import is_token_revoked
 
 from .devices import *
 
-from .oauth2 import add_oauth2_credentials, get_default_credentials
+from .oauth2 import *
 
 from .home import *
 
@@ -21,6 +21,7 @@ all = [
     'is_token_revoked',
     'add_oauth2_credentials',
     'get_default_credentials',
+    'oauth2_credentials_to_json',
     'add_token_to_database',
     'is_token_revoked',
     'add_oauth2_credentials',
@@ -33,11 +34,13 @@ all = [
     'str_to_base64',
 ]
 
+
 def base64_to_str(data):
     '''
     Encode string data to base64 string.
     '''
     return base64.b64decode(data.encode()).decode()
+
 
 def str_to_base64(data):
     '''

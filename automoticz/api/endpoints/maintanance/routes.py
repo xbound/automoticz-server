@@ -42,7 +42,7 @@ class Activate(Resource):
             creds = get_default_credentials()
             proximity.init_api(creds)
         beacon_name = get_default_auth_beacon_name()
-        return {'status': 'OK'}, 200
+        return {'beacon_name': beacon_name}, 200
 
 
 @maintanance_namespace.route('/systime')

@@ -15,6 +15,8 @@ from .home import *
 def base64_to_str(data):
     '''
     Encode string data to base64 string.
+
+    :param data: str to decode
     '''
     return base64.b64decode(data.encode()).decode()
 
@@ -22,6 +24,8 @@ def base64_to_str(data):
 def str_to_base64(data):
     '''
     Decode base64 string to Python string.
+
+    :param data: str to encode
     '''
-    u_token_bytes = str.encode(data)
-    return base64.b64encode(u_token_bytes).decode()
+    encoded_string = str.encode(data)
+    return base64.b64encode(encoded_string).decode()

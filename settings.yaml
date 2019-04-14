@@ -4,10 +4,10 @@ default:
   JWT_BLACKLIST_ENABLED: true
   SWAGGER_UI_JSONEDITOR: true
   ENCODING_FOR_DYNACONF: "utf-8"
-development:
-  DEBUG: true
   CACHE_TYPE: "simple"
   CACHE_DEFAULT_TIMEOUT: 300
+development:
+  DEBUG: true
 testing:
   DEBUG: true
   SQLALCHEMY_DATABASE_URI: "sqlite:///:memory:"

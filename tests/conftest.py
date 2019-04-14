@@ -3,7 +3,6 @@ import pytest
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import create_refresh_token
 from automoticz.app import create_app
-from automoticz.models import User
 from automoticz.extensions import db as _db
 
 
@@ -28,15 +27,6 @@ def database(app):
 
     _db.session.close()
     _db.drop_all()
-
-
-@pytest.fixture
-def user(database):
-    username = 'user'
-    user = User(username=username)
-    database.session.add(user)
-    database.session.commit()
-    return user
 
 
 @pytest.fixture

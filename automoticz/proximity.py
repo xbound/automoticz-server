@@ -1,9 +1,12 @@
 import base64
 
-from flask import _app_ctx_stack
-
-from automoticz.utils.constants import OAUTH2
 from googleapiclient import discovery
+
+
+class OAUTH2:
+    API_NAME = 'proximitybeacon'
+    API_VERSION = 'v1beta1'
+    SCOPES = ['https://www.googleapis.com/auth/userlocation.beacon.registry']
 
 
 class ProximityBeaconAPI:
@@ -18,7 +21,6 @@ class ProximityBeaconAPI:
         '''
         if app:
             self.init_app(app, credentials)
-
 
     def init_app(self, app, credentials=None):
         '''

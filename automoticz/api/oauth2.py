@@ -2,7 +2,7 @@ from flask import current_app as app
 from flask import redirect, request, session, url_for
 from google_auth_oauthlib import flow
 
-from automoticz.utils.constants import OAUTH2
+from automoticz.proximity import OAUTH2
 from automoticz.utils import add_oauth2_credentials
 
 from .views import oauth2_blueprint

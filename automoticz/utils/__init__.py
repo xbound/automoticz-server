@@ -10,6 +10,7 @@ from .devices import *
 from .oauth2 import *
 
 from .home import *
+from .analytics import *
 
 
 def base64_to_str(data):

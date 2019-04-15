@@ -26,3 +26,11 @@ class UsageLog(db.Model):
             date=date,
             status=status
         )
+
+    def to_dict():
+        return {
+            'idx': self.idx,
+            'user_idx': self.user_idx,
+            'date': self.date,
+            'status': self.status
+        }

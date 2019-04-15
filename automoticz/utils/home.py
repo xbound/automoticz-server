@@ -13,7 +13,6 @@ def get_settings():
     '''
     Returns Domoticz settings. 
     '''
-
     return domoticz.api_call({'type': 'settings'})
 
 
@@ -135,59 +134,3 @@ def turn_switch_light(idx: IdxType, switchMode: str):
         'switchcmd': switchMode
     }
     return domoticz.api_call(params)
-
-
-
-@cache.memoize()
-def fetch_devices_usage_map(from_idx: int, to_idx: int) -> dict:
-    ''' 
-    Fetch logging imposter devices from the server limited by given range
-    and create map for each device according to each user.
-
-    :param from_idx: idx of first device, range beggining.
-    :param to_idx: idx of last device, range ending.
-    :return: dict 
-    '''
-    users = get_users()
-    username_idx_map = {user['Username']: int(user['idx']) for user in users}
-    devices = get_used_devices()
-    devicename_idx_map = {
-        device['Name']: int(device['idx'])
-        for device in devices
-    }
-    devices_usage_mapping = {}
-
-    def _idx_in_between(idx):
-        if idx < from_idx:
-            return False
-        if idx > to_idx:
-            return False
-        return True
-
-    def _split_device_name(name):
-        splitted = name.split('-')
-        return tuple(s.strip() for s in splitted)
-
-    def _append_to_mapping(device):
-        device_name, user_label = _split_device_name(device['Name'])
-        device_id = devicename_idx_map[device_name]
-        if device_id not in devices_usage_mapping:
-            devices_usage_mapping[device_id] = []
-        user_id = app.config.USER_MAPPING[user_label]
-        user_id = username_idx_map[user_id]
-        impostor_idx = int(device['idx'])
-        devices_usage_mapping[device_id].append({
-            'impostor_idx':
-            impostor_idx,
-            'user_idx':
-            user_id,
-            'device_type':
-            device['SubType'],
-        })
-
-    for device in devices:
-        impostor_idx = int(device['idx'])
-        if _idx_in_between(impostor_idx):
-            _append_to_mapping(device)
-
-    return devices_usage_mapping

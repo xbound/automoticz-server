@@ -58,6 +58,7 @@ def init_celery(app=None):
     app = app or create_app()
     celery_app.conf.broker_url = app.config['CELERY_BROKER_URL']
     celery_app.conf.result_backend = app.config['CELERY_RESULT_BACKEND']
+    celery_app.conf.task_default_queue = app.config['CELERY_TASK_DEFAULT_QUEUE']
     celery_app.conf.update(app.config)
 
     class ContextTask(celery_app.Task):

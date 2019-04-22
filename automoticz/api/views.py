@@ -20,10 +20,10 @@ api = Api(
     api_blueprint,
     title='Automoticz API',
     version='1.0-dev',
-    description='REST API for automoticz.')
+    description='REST API for Automoticz system.')
 
-api.add_namespace(maintanance_namespace, path='/maintanance')
-# api.add_namespace(devices_namespace, path='/devices')
+api.add_namespace(system_namespace, path='/system')
+api.add_namespace(beacon_auth_namespace, path='/beacon_auth')
 
 
 @jwt.token_in_blacklist_loader

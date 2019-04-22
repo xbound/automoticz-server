@@ -1,7 +1,7 @@
-from .maintanance import maintanance_namespace
-from .devices import devices_namespace
+from .maintanance import *
+from .beacon_auth import *
 
 __all__ = [
-    'maintanance_namespace',
-    'devices_namespace'
+    'system_namespace',
+    'beacon_auth_namespace'
 ]

@@ -56,8 +56,3 @@ def test_turn_switch_light(app):
         idx = 188
         assert turn_switch_light(idx, 'On')
         assert turn_switch_light(idx, 'Off')
-
-
-def test_fetch_devices_usage_map(app):
-    with app.app_context():
-        assert fetch_devices_usage_map(111, 187)

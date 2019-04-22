@@ -1,8 +1,8 @@
 from flask_restplus import Namespace
 
-maintanance_namespace = Namespace(
-    'maintanance', description='Endpoint for server common maintanance.')
+system_namespace = Namespace(
+    'system', description='Endpoint group for calling common system functions.')
 
 from .routes import *
 
-__all__ = ['maintanance_namespace']
+__all__ = ['system_namespace']

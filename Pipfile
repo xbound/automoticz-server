@@ -10,12 +10,13 @@ pdbpp = "*"
 flask-shell-ipython = "*"
 pytest-cov = "*"
 rope = "*"
+pytest-mock = "*"
 
 [requires]
 python_version = "3.5"
 
 [packages]
-dynaconf = {extras = ["yaml"],version = "*"}
+dynaconf = {version = "*",extras = ["yaml"]}
 flask-jwt-extended = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"

@@ -1,3 +1,5 @@
+import random
+
 from automoticz.extensions import proximity, cache
 from automoticz.utils import base64_to_str, str_to_base64
 
@@ -11,7 +13,6 @@ def get_default_auth_beacon_name():
     api = proximity.api
     query = 'status:active'
     response = api.beacons().list(q=query).execute()
-    # Caching variable
     default_beacon_name = response['beacons'][0]['beaconName']
     return default_beacon_name
 
@@ -74,7 +75,7 @@ def unset_pin():
 
 
 def set_pin(pin):
-    ''' Sets "u_token" type attachment on authentication beacon identified
+    ''' Sets "pin" type attachment on authentication beacon identified
     by beacon_name.
 
     :param pin: unique token
@@ -95,3 +96,12 @@ def set_pin(pin):
     }
     resp = api.beacons().attachments().create(**query).execute()
     return resp
+
+
+def generate_pin():
+    ''' Generates new pin.
+
+    :return: pin 
+    '''
+    new_pin = str(random.randint(1, 999999999))
+    return new_pin

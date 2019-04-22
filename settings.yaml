@@ -1,15 +1,22 @@
 default:
-  SQLALCHEMY_TRACK_MODIFICATIONS: true
+  # JWT Configuration
   JWT_TOKEN_LOCATION: ["json", "headers"]
   JWT_BLACKLIST_ENABLED: true
+  JWT_REFRESH_TOKEN_EXPIRES: false
   SWAGGER_UI_JSONEDITOR: true
   ENCODING_FOR_DYNACONF: "utf-8"
   CACHE_TYPE: "simple"
   CACHE_DEFAULT_TIMEOUT: 300
+  SQLALCHEMY_TRACK_MODIFICATIONS: true
 development:
   DEBUG: true
+  CELERY_TASK_DEFAULT_QUEUE: "automoticz"
 testing:
   DEBUG: true
   SQLALCHEMY_DATABASE_URI: "sqlite:///:memory:"
+  CELERY_BROKER_URL: "redis://localhost:6379/0"
+  CELERY_RESULT_BACKEND: "redis://localhost:6379/0"
+  CELERY_TASK_DEFAULT_QUEUE: "automoticz_test"
 production:
   DEBUG: false
+  CELERY_TASK_DEFAULT_QUEUE: "automoticz"

@@ -1,7 +1,7 @@
 from flask_restplus import fields
 
 from automoticz.utils.constants import MESSAGE
-from . import devices_namespace as api
+from . import beacon_auth_namespace as api
 
 # Fields
 access_token_field = fields.String(
@@ -14,11 +14,8 @@ refresh_token_field = fields.String(
 # Login models
 register_reguest = api.model(
     'Device registration request', {
-        'u_token': fields.String(description='Base64 encoded token'),
-        'device': fields.String(description='Device name'),
-        'model': fields.String(description='Model name'),
-        'manufacturer': fields.String(description='Manufacturer of device'),
-        'product': fields.String(description='Product name'),
+        'pin': fields.String(description='Base64 encoded token'),
+        'client': fields.String(description='Client name'),
     })
 
 register_response = api.model(

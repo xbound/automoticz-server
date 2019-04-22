@@ -28,8 +28,7 @@ class ProximityBeaconAPI:
         '''
         self.app = app
         self.project_id = app.config.PROJECT_ID
-        if credentials:
-            self.init_api(credentials)
+        self.init_api(credentials)
 
     @property
     def api(self):
@@ -47,6 +46,7 @@ class ProximityBeaconAPI:
 
         :param credentials: google.oauth2.credentials.Credentials object  
         '''
-        proximitybeaconapi = discovery.build(
-            OAUTH2.API_NAME, OAUTH2.API_VERSION, credentials=credentials)
-        self.app.extensions['proximity'] = proximitybeaconapi
+        if credentials:
+            proximitybeaconapi = discovery.build(
+                OAUTH2.API_NAME, OAUTH2.API_VERSION, credentials=credentials)
+            self.app.extensions['proximity'] = proximitybeaconapi

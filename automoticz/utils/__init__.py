@@ -1,11 +1,8 @@
 import base64
 from .constants import *
 
-from .jwt import add_device_token
-from .jwt import revoke_device_token
-from .jwt import is_token_revoked
-
-from .devices import *
+from .auth import *
+from .beacon_auth import *
 
 from .oauth2 import *
 
@@ -30,3 +27,5 @@ def str_to_base64(data):
     '''
     encoded_string = str.encode(data)
     return base64.b64encode(encoded_string).decode()
+
+from .beacons import *

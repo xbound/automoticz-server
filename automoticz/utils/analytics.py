@@ -91,7 +91,6 @@ def schedule_to_pandas(users_weekdays_schedule):
 
     :param users_weekday_schedule: result of make_users_weekday_schedule
     '''
-
     users_weekdays_schedule_pd = defaultdict(dict)
     for user in users_weekdays_schedule:
         for weekday in users_weekdays_schedule[user]:
@@ -102,6 +101,7 @@ def schedule_to_pandas(users_weekdays_schedule):
             ]
             df = pandas.DataFrame(weekday_matrix_rows)
             df.set_index('idx', inplace=True)
+            df = df.fillna(VALUE_MAPPING[numpy.nan])
             users_weekdays_schedule_pd[user][weekday] = df
     return users_weekdays_schedule_pd
 

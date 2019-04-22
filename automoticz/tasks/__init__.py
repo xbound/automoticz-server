@@ -8,6 +8,9 @@ from automoticz.extensions import celery_app, db, cache
 from automoticz.models import UsageLog
 from automoticz.utils import get_users, get_used_devices, get_switch_history, get_temperature_history
 
+@celery_app.task
+def get_beacon_pin(self):
+    pass
 
 def filter_log_duplicates(summary_log):
     tupled_logs = {tuple(log.items()) for log in summary_log}

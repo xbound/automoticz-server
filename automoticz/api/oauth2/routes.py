@@ -4,13 +4,13 @@ from flask import redirect, request, session, url_for
 from flask_restplus import Resource
 from google_auth_oauthlib import flow
 
-from automoticz.proximity import OAUTH2
+from automoticz.plugins.proximity import OAUTH2
 from automoticz.utils import add_oauth2_credentials
 
-from . import oauth_namespace
+from . import namespace
 
 
-@oauth_namespace.route('/authorize')
+@namespace.route('/authorize')
 class Authorize(Resource):
 
     def get(self):
@@ -27,7 +27,7 @@ class Authorize(Resource):
         return redirect(authorization_url)
 
 
-@oauth_namespace.route('/callback')
+@namespace.route('/callback')
 class Callback(Resource):
 
     def get(self):

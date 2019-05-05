@@ -1,15 +1,28 @@
 default:
   DEBUG: false
+
   ENCODING_FOR_DYNACONF: "utf-8"
+
   JWT_BLACKLIST_ENABLED: true
   JWT_REFRESH_TOKEN_EXPIRES: false
   JWT_TOKEN_LOCATION: ["json", "headers"]
+
   SWAGGER_UI_JSONEDITOR: true
+
   CACHE_TYPE: "simple"
   CACHE_DEFAULT_TIMEOUT: 300
+
   SQLALCHEMY_TRACK_MODIFICATIONS: true
+
   CLIENT_SECRETS_FILE: "{BASE_URL}/data/client-secrets.json"
   CREDENTIALS_FILE: "{BASE_URL}/data/credentials.json"
+  ENABLED_ENDPOINTS:
+    - module: "automoticz.api.beacon_auth"
+      url_path: "/beacon_auth"
+    - module: "automoticz.api.system"
+      url_path: "/system"
+    - module: "automoticz.api.oauth2"
+      url_path: "/oauth2"
   CELERY_TASKS:
     - "automoticz.tasks"
 development:

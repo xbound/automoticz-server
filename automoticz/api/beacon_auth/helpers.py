@@ -1,7 +1,7 @@
 from flask_restplus import fields
 
 from automoticz.utils.constants import MESSAGE
-from . import beacon_auth_namespace as api
+from . import namespace as api
 
 # Fields
 access_token_field = fields.String(

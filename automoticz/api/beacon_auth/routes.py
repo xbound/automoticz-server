@@ -10,12 +10,12 @@ from automoticz.utils import is_pin_valid, set_pin, generate_pin
 
 from automoticz.tasks import set_beacon_pin
 
-from . import beacon_auth_namespace as api
+from . import namespace as api
 from .helpers import register_reguest, register_response
 
 
 @api.route('/login')
-class Register(Resource):
+class Login(Resource):
     '''
     Device regestration endpoint.
     '''

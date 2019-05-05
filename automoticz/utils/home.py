@@ -3,7 +3,7 @@ import typing
 from flask import current_app as app
 
 from automoticz.extensions import cache, domoticz
-from automoticz.domoticz import CONSTANTS
+from automoticz.plugins.domoticz import CONSTANTS
 
 IdxType = typing.Union[int, str]
 

@@ -11,8 +11,8 @@ migrate = Migrate()
 cache = Cache()
 celery_app = Celery()
 
-from automoticz.domoticz import DomoticzAPI
+from automoticz.plugins.domoticz import DomoticzAPI
 domoticz = DomoticzAPI()
 
-from automoticz.proximity import ProximityBeaconAPI
+from automoticz.plugins.proximity import ProximityBeaconAPI
 proximity = ProximityBeaconAPI()

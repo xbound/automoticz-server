@@ -1,15 +1,17 @@
 import os
 
 from flask import Flask
+from flask import Blueprint
+from flask_restplus import Api
 from dynaconf import FlaskDynaconf
 
 from automoticz.extensions import *
 from automoticz.cli import test
 from automoticz.cli import reset_migrations
-from automoticz.api.views import api_blueprint
 from automoticz.utils.constants import ENV
 from automoticz.utils.oauth2 import get_default_credentials
 from automoticz.tasks import get_beacon_pin
+from automoticz.settings_loader import load_celery_imports, load_api_endpoints
 
 
 def configure_app(app):
@@ -47,6 +49,14 @@ def register_blueprints(app):
     '''
     Register blueprints for app.
     '''
+    api_blueprint = Blueprint('api', __name__, url_prefix='/api')
+
+    api = Api(api_blueprint,
+              title='Automoticz API',
+              version='1.0-dev',
+              description='REST API for Automoticz system.')
+
+    load_api_endpoints(app, api)
     app.register_blueprint(api_blueprint)
 
 
@@ -55,10 +65,9 @@ def init_celery(app=None):
     Initialize Celery instance
     '''
     app = app or create_app()
-    celery_app.conf.broker_url = app.config['CELERY_BROKER_URL']
-    celery_app.conf.result_backend = app.config['CELERY_RESULT_BACKEND']
-    celery_app.conf.task_default_queue = app.config[
-        'CELERY_TASK_DEFAULT_QUEUE']
+    celery_app.conf.broker_url = app.config.CELERY_BROKER_URL
+    celery_app.conf.result_backend = app.config.CELERY_RESULT_BACKEND
+    celery_app.conf.task_default_queue = app.config.CELERY_TASK_DEFAULT_QUEUE
     celery_app.conf.update(app.config)
 
     class ContextTask(celery_app.Task):
@@ -69,7 +78,7 @@ def init_celery(app=None):
                 return self.run(*args, **kwargs)
 
     celery_app.Task = ContextTask
-    celery_app.conf.imports = celery_app.conf.imports + tuple(app.config.CELERY_TASKS)
+    celery_app.conf.imports = load_celery_imports(app, celery_app.conf.imports)
     celery_app.conf.task_serializer = 'json'
     celery_app.conf.result_serializer = 'pickle'
     celery_app.conf.accept_content = ['json', 'pickle']

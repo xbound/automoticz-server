@@ -10,9 +10,9 @@ from automoticz.extensions import proximity
 from automoticz.utils import get_default_credentials, get_users
 from automoticz.utils.beacons import get_default_auth_beacon_name
 
-from . import system_namespace
+from . import namespace
 
-systime_response = system_namespace.model(
+systime_response = namespace.model(
     'System time  response', {
         'time':
         fields.String(
@@ -21,7 +21,7 @@ systime_response = system_namespace.model(
     })
 
 
-@system_namespace.route('/ping')
+@namespace.route('/ping')
 class Ping(Resource):
     '''
     Ping endpoint.
@@ -31,7 +31,7 @@ class Ping(Resource):
         return {'status': 'OK'}, 200
 
 
-@system_namespace.route('/activate')
+@namespace.route('/activate')
 class Activate(Resource):
     '''
     Proximity Beacon API initialization endpoint.
@@ -45,19 +45,19 @@ class Activate(Resource):
         return {'beacon_name': beacon_name}, 200
 
 
-@system_namespace.route('/systime')
+@namespace.route('/systime')
 class SysTime(Resource):
     '''
     System time endpoint
     '''
 
     @jwt_required
-    @system_namespace.marshal_with(systime_response)
+    @namespace.marshal_with(systime_response)
     def get(self):
         return {'time': time.strftime('%A %B, %d %Y %H:%M:%S')}, 200
 
 
-@system_namespace.route('/users')
+@namespace.route('/users')
 class Users(Resource):
     '''
     Users endpoint

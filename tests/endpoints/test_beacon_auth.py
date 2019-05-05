@@ -11,7 +11,7 @@ def test_login(mocker, app, client):
                  return_value='project/automoticz-project')
     mocker.patch('automoticz.utils.beacons.unset_pin')
     mocker.patch('automoticz.utils.beacons.generate_pin', return_value='0000')
-    mocker.patch('automoticz.api.endpoints.beacon_auth.routes.set_beacon_pin')
+    mocker.patch('automoticz.api.beacon_auth.routes.set_beacon_pin')
 
     json_payload = {'pin': to_base64('0000'), 'client': 'Android Google Pixel 3'}
     response = post_json(client, 'api/beacon_auth/login', json_payload)

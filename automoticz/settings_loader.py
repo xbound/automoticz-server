@@ -12,7 +12,7 @@ def load_celery_imports(app, default=None):
     '''
     celery_tasks = default or tuple()
     celery_tasks += tuple(app.config.CELERY_TASKS)
-    return
+    return celery_tasks
 
 
 def load_api_endpoints(app, api: Api):

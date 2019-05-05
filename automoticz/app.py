@@ -6,7 +6,6 @@ from flask_restplus import Api
 from dynaconf import FlaskDynaconf
 
 from automoticz.extensions import *
-from automoticz.cli import test
 from automoticz.cli import reset_migrations
 from automoticz.utils.constants import ENV
 from automoticz.utils.oauth2 import get_default_credentials
@@ -41,7 +40,6 @@ def init_cli(app):
     '''
     Initialize cli commands.
     '''
-    app.cli.add_command(test)
     app.cli.add_command(reset_migrations)
 
 

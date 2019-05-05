@@ -8,13 +8,13 @@ build/
 dist/
 *.egg-info/
 *.egg/
-*.pyc
+**/*.pyc
 *.swp
 
 .tox
 .coverage
 html/*
-__pycache__
+**/__pycache__
 
 # Compiled Documentation
 docs/_build/

@@ -7,9 +7,9 @@ from automoticz.extensions import *
 from automoticz.cli import test
 from automoticz.cli import reset_migrations
 from automoticz.api.views import api_blueprint
-from automoticz.api.views import oauth2_blueprint
 from automoticz.utils.constants import ENV
 from automoticz.utils.oauth2 import get_default_credentials
+from automoticz.tasks import get_beacon_pin
 
 
 def configure_app(app):
@@ -48,7 +48,6 @@ def register_blueprints(app):
     Register blueprints for app.
     '''
     app.register_blueprint(api_blueprint)
-    app.register_blueprint(oauth2_blueprint)
 
 
 def init_celery(app=None):
@@ -58,7 +57,8 @@ def init_celery(app=None):
     app = app or create_app()
     celery_app.conf.broker_url = app.config['CELERY_BROKER_URL']
     celery_app.conf.result_backend = app.config['CELERY_RESULT_BACKEND']
-    celery_app.conf.task_default_queue = app.config['CELERY_TASK_DEFAULT_QUEUE']
+    celery_app.conf.task_default_queue = app.config[
+        'CELERY_TASK_DEFAULT_QUEUE']
     celery_app.conf.update(app.config)
 
     class ContextTask(celery_app.Task):
@@ -69,7 +69,7 @@ def init_celery(app=None):
                 return self.run(*args, **kwargs)
 
     celery_app.Task = ContextTask
-    celery_app.conf.imports = celery_app.conf.imports + ('automoticz.tasks', )
+    celery_app.conf.imports = celery_app.conf.imports + tuple(app.config.CELERY_TASKS)
     celery_app.conf.task_serializer = 'json'
     celery_app.conf.result_serializer = 'pickle'
     celery_app.conf.accept_content = ['json', 'pickle']
@@ -90,10 +90,12 @@ def post_init(app):
     import urllib3
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    # Initializing Proximity Beacon API
     with app.app_context():
+        # Initializing Proximity Beacon API
         creds = get_default_credentials()
         proximity.init_api(creds)
+        # Getting PIN and saving to cache
+        get_beacon_pin.delay()
 
 
 def create_app():
@@ -104,6 +106,7 @@ def create_app():
     configure_app(app)
     init_extensions(app)
     register_blueprints(app)
+    init_celery(app)
     init_cli(app)
     post_init(app)
     return app

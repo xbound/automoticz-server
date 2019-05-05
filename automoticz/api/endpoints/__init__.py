@@ -1,7 +1,3 @@
-from .maintanance import *
+from .system import *
 from .beacon_auth import *
-
-__all__ = [
-    'system_namespace',
-    'beacon_auth_namespace'
-]
+from .oauth2 import *

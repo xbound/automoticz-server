@@ -27,7 +27,7 @@ class UsageLog(db.Model):
             status=status
         )
 
-    def to_dict():
+    def to_dict(self):
         return {
             'idx': self.idx,
             'user_idx': self.user_idx,

@@ -1,9 +1,10 @@
 import random
 
-from automoticz.extensions import proximity, cache
-from automoticz.utils import base64_to_str, str_to_base64
+from automoticz.extensions import proximity
+from automoticz.utils import base64_to_str, str_to_base64, cached_with_key
 
 
+@cached_with_key('beacon')
 def get_default_auth_beacon_name():
     ''' Returns name of the beacon which property "auth" is set to 
     "true".
@@ -17,6 +18,7 @@ def get_default_auth_beacon_name():
     return default_beacon_name
 
 
+@cached_with_key('project_namespace')
 def get_default_project_namespace():
     ''' Returns name of default namespace for attachments
 
@@ -26,9 +28,10 @@ def get_default_project_namespace():
     query = {'projectId': proximity.project_id}
     resp = api.namespaces().list(**query).execute()
     default_project_namespace = resp['namespaces'][0]['namespaceName']
-    return default_project_namespace
+    return default_project_namespace.split('/')[1]
 
 
+@cached_with_key('pin')
 def get_pin():
     ''' Checks if for beacon with given name pin attachment
     is set.
@@ -37,8 +40,8 @@ def get_pin():
     :param namespace: namespace
     '''
     api = proximity.api
-    beacon_name = get_default_auth_beacon_name()
-    namespace = get_default_project_namespace().split('/')[1]
+    beacon_name = get_default_auth_beacon_name(cached=True)
+    namespace = get_default_project_namespace(cached=True)
     namespaced_type = '{}/pin'.format(namespace)
     query = {'beaconName': beacon_name, 'namespacedType': namespaced_type}
     resp = api.beacons().attachments().list(**query).execute()
@@ -54,7 +57,7 @@ def is_pin_valid(pin):
     :return: True or False
     '''
     request_pin = base64_to_str(pin)
-    current_pin = get_pin()
+    current_pin = get_pin(cached=True)
     return request_pin == current_pin
 
 
@@ -62,9 +65,9 @@ def unset_pin():
     ''' Unsets "pin" type attachment on authentication beacon identified
     by beacon_name.
     '''
-    beacon_name = get_default_auth_beacon_name()
     api = proximity.api
-    namespace = get_default_project_namespace().split('/')[1]
+    beacon_name = get_default_auth_beacon_name(cached=True)
+    namespace = get_default_project_namespace(cached=True)
     namespaced_type = '{}/pin'.format(namespace)
     query = {
         'beaconName': beacon_name,
@@ -80,9 +83,9 @@ def set_pin(pin):
 
     :param pin: unique token
     '''
-    beacon_name = get_default_auth_beacon_name()
     api = proximity.api
-    namespace = get_default_project_namespace().split('/')[1]
+    beacon_name = get_default_auth_beacon_name(cached=True)
+    namespace = get_default_project_namespace(cached=True)
     namespaced_type = '{}/pin'.format(namespace)
     if get_pin() is not None:
         unset_pin()

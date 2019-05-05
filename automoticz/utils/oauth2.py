@@ -43,7 +43,9 @@ def get_default_credentials() -> Credentials:
     :return: google.oauth2.credentials.Credentials object
     '''
     if app.config.CREDENTIALS_FILE:
-        return oauth2_credentials_from_file(app.config.CREDENTIALS_FILE)
+        creds =  oauth2_credentials_from_file(app.config.CREDENTIALS_FILE)
+        if creds:
+            return creds
     oauth2_credentials = OAuth2Credentials.query.filter(
         OAuth2Credentials.refresh_token.isnot(None)).first()
     if not oauth2_credentials:
@@ -85,6 +87,9 @@ def oauth2_credentials_from_file(path: str = None) -> Credentials:
 
     :param path: path to file.
     '''
-    with open(path, 'r') as creds_file:
-        creds = json.load(creds_file)
-    return Credentials(**creds)
+    try:
+        with open(path, 'r') as creds_file:
+            creds = json.load(creds_file)
+        return Credentials(**creds)
+    except:
+        return None

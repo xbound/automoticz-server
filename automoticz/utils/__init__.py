@@ -1,4 +1,5 @@
 import base64
+from functools import wraps
 from .constants import *
 
 from .auth import *
@@ -7,7 +8,8 @@ from .beacon_auth import *
 from .oauth2 import *
 
 from .home import *
-from .analytics import *
+
+from automoticz.extensions import cache
 
 
 def base64_to_str(data):
@@ -27,5 +29,25 @@ def str_to_base64(data):
     '''
     encoded_string = str.encode(data)
     return base64.b64encode(encoded_string).decode()
+
+
+def cached_with_key(key):
+    '''Caching decorator for saving function return
+    value to cache.
+
+    :param key: key.
+    '''
+    def wrap(func):
+        def wrapper(*args, **kwargs):
+            if kwargs.pop('cached', False):
+                val = cache.get(key)
+                if val:
+                    return val
+            val = func(*args, **kwargs)
+            cache.set(key, val, timeout=CACHE_LONG_TIMEOUT)
+            return val
+        return wrapper
+    return wrap
+
 
 from .beacons import *

@@ -10,10 +10,6 @@ from automoticz.api.endpoints import *
 from automoticz.extensions import jwt
 from automoticz.utils import is_token_revoked
 
-oauth2_blueprint = Blueprint('oauth2', __name__, url_prefix='/oauth2')
-
-from automoticz.api.oauth2 import *
-
 api_blueprint = Blueprint('api', __name__, url_prefix='/api')
 
 api = Api(
@@ -24,6 +20,7 @@ api = Api(
 
 api.add_namespace(system_namespace, path='/system')
 api.add_namespace(beacon_auth_namespace, path='/beacon_auth')
+api.add_namespace(oauth_namespace, path='/oauth2')
 
 
 @jwt.token_in_blacklist_loader

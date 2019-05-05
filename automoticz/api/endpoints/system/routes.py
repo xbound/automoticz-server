@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required
 from automoticz.models import OAuth2Credentials
 from automoticz.utils.constants import MESSAGE
 from automoticz.extensions import proximity
-from automoticz.utils import get_default_credentials
+from automoticz.utils import get_default_credentials, get_users
 from automoticz.utils.beacons import get_default_auth_beacon_name
 
 from . import system_namespace
@@ -41,7 +41,7 @@ class Activate(Resource):
         if not proximity.api:
             creds = get_default_credentials()
             proximity.init_api(creds)
-        beacon_name = get_default_auth_beacon_name()
+        beacon_name = get_default_auth_beacon_name(cached=True)
         return {'beacon_name': beacon_name}, 200
 
 
@@ -55,3 +55,20 @@ class SysTime(Resource):
     @system_namespace.marshal_with(systime_response)
     def get(self):
         return {'time': time.strftime('%A %B, %d %Y %H:%M:%S')}, 200
+
+
+@system_namespace.route('/users')
+class Users(Resource):
+    '''
+    Users endpoint
+    '''
+
+    @jwt_required
+    def get(self):
+        users = get_users()
+        for user_dict in users:
+            user_dict.pop('Password')
+            for key in user_dict.keys():
+                user_dict[key.lower()] = user_dict.pop(key)
+        return users
+        

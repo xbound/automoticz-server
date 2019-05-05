@@ -1,15 +1,24 @@
 default:
-  # JWT Configuration
-  JWT_TOKEN_LOCATION: ["json", "headers"]
+  DEBUG: false
+  ENCODING_FOR_DYNACONF: "utf-8"
   JWT_BLACKLIST_ENABLED: true
   JWT_REFRESH_TOKEN_EXPIRES: false
+  JWT_TOKEN_LOCATION: ["json", "headers"]
   SWAGGER_UI_JSONEDITOR: true
-  ENCODING_FOR_DYNACONF: "utf-8"
   CACHE_TYPE: "simple"
   CACHE_DEFAULT_TIMEOUT: 300
   SQLALCHEMY_TRACK_MODIFICATIONS: true
+  CLIENT_SECRETS_FILE: "{BASE_URL}/data/client-secrets.json"
+  CREDENTIALS_FILE: "{BASE_URL}/data/credentials.json"
+  CELERY_TASKS:
+    - "automoticz.tasks"
 development:
   DEBUG: true
+  SQLALCHEMY_DATABASE_URI: "sqlite:///{BASE_URL}/db.sqlite3"
+  CELERY_BROKER_URL: "redis://localhost:6379/0"
+  CELERY_RESULT_BACKEND: "redis://localhost:6379/0"
+  CACHE_TYPE: "redis"
+  CACHE_REDIS_HOST: 'localhost'
   CELERY_TASK_DEFAULT_QUEUE: "automoticz"
 testing:
   DEBUG: true
@@ -18,5 +27,4 @@ testing:
   CELERY_RESULT_BACKEND: "redis://localhost:6379/0"
   CELERY_TASK_DEFAULT_QUEUE: "automoticz_test"
 production:
-  DEBUG: false
   CELERY_TASK_DEFAULT_QUEUE: "automoticz"

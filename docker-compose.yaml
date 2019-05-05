@@ -10,7 +10,7 @@ services:
   celery:
     build: .
     container_name: "celery"
-    command: celery -A automoticz.celery.app worker --loglevel=debug
+    command: celery -A automoticz.celery.celery_app worker --loglevel=debug
     volumes:
       - .:/usr/src/app
     depends_on:

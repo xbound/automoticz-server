@@ -29,15 +29,3 @@ def database(app):
     _db.drop_all()
 
 
-@pytest.fixture
-def access_token(app, user):
-    with app.app_context():
-        access_token = create_access_token(user.id)
-        return access_token
-
-
-@pytest.fixture
-def refresh_token(app, user):
-    with app.app_context():
-        refresh_token = create_refresh_token(user.id)
-        return refresh_token

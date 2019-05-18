@@ -1,7 +1,11 @@
 import random
+import json
 
 from automoticz.extensions import proximity
-from automoticz.utils import base64_to_str, str_to_base64, cached_with_key
+from automoticz.utils import base64_to_str
+from automoticz.utils import str_to_base64
+from automoticz.utils import cached_with_key
+from automoticz.utils import CACHE_PIN_KEY, PIN_ATTACHMENT_KEY
 
 
 @cached_with_key('beacon')
@@ -31,7 +35,7 @@ def get_default_project_namespace():
     return default_project_namespace.split('/')[1]
 
 
-@cached_with_key('pin')
+@cached_with_key(CACHE_PIN_KEY)
 def get_pin():
     ''' Checks if for beacon with given name pin attachment
     is set.
@@ -42,11 +46,15 @@ def get_pin():
     api = proximity.api
     beacon_name = get_default_auth_beacon_name(cached=True)
     namespace = get_default_project_namespace(cached=True)
-    namespaced_type = '{}/pin'.format(namespace)
+    namespaced_type = '{}/{}'.format(namespace, PIN_ATTACHMENT_KEY)
     query = {'beaconName': beacon_name, 'namespacedType': namespaced_type}
     resp = api.beacons().attachments().list(**query).execute()
-    b64_data = resp['attachments'][0]['data']
-    return base64_to_str(b64_data)
+    attachments = resp.get('attachments')
+    if not attachments:
+        return None
+    b64_data = attachments[0]['data']
+    data = json.loads(base64_to_str(b64_data))
+    return data[PIN_ATTACHMENT_KEY]
 
 
 def is_pin_valid(pin):
@@ -68,7 +76,7 @@ def unset_pin():
     api = proximity.api
     beacon_name = get_default_auth_beacon_name(cached=True)
     namespace = get_default_project_namespace(cached=True)
-    namespaced_type = '{}/pin'.format(namespace)
+    namespaced_type = '{}/{}'.format(namespace, PIN_ATTACHMENT_KEY)
     query = {
         'beaconName': beacon_name,
         'namespacedType': namespaced_type,
@@ -86,7 +94,7 @@ def set_pin(pin):
     api = proximity.api
     beacon_name = get_default_auth_beacon_name(cached=True)
     namespace = get_default_project_namespace(cached=True)
-    namespaced_type = '{}/pin'.format(namespace)
+    namespaced_type = '{}/{}'.format(namespace, PIN_ATTACHMENT_KEY)
     if get_pin() is not None:
         unset_pin()
     query = {
@@ -106,5 +114,8 @@ def generate_pin():
 
     :return: pin 
     '''
-    new_pin = str(random.randint(1, 999999999))
-    return new_pin
+    app = proximity.app
+    return json.dumps({
+        'url': app.config.PUBLIC_URL,
+        PIN_ATTACHMENT_KEY: str(random.randint(1, 999999999))
+    })

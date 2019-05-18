@@ -7,9 +7,9 @@ from dynaconf import FlaskDynaconf
 
 from automoticz.extensions import *
 from automoticz.cli import reset_migrations
-from automoticz.utils.constants import ENV
+from automoticz.utils.constants import ENV, CACHE_PIN_KEY
 from automoticz.utils.oauth2 import get_default_credentials
-from automoticz.tasks import get_beacon_pin
+from automoticz.tasks import get_beacon_pin, set_beacon_pin
 from automoticz.settings_loader import load_celery_imports, load_api_endpoints
 
 
@@ -101,8 +101,13 @@ def post_init(app):
         # Initializing Proximity Beacon API
         creds = get_default_credentials()
         proximity.init_api(creds)
-        # Getting PIN and saving to cache
-        get_beacon_pin.delay()
+        # Getting PIN and saving to cache if not present
+        if not cache.get(CACHE_PIN_KEY):
+            get_beacon_pin.delay()
+        # If configuration requires reload pin attachment on 
+        # authentication beacon
+        if app.config.RELOAD_PIN_ON_START:
+            set_beacon_pin.delay()
 
 
 def create_app():

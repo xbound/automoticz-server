@@ -53,18 +53,19 @@ def get_default_credentials() -> Credentials:
     return oauth2_credentials.get_creds()
 
 
-def oauth2_credentials_to_dict(credentials: Credentials) -> dict:
+def oauth2_credentials_to_dict(credentials: Credentials, ignore_access=False) -> dict:
     '''
     Transforms Google OAuth2 Credentials to dictionary:
 
     :param credentials: Credentials object
+    :param ignore_access: flag to ignore access token
     :return: dict
     '''
     return {
         'token_uri': credentials.token_uri,
         'client_id': credentials.client_id,
         'client_secret': credentials.client_secret,
-        'token': credentials.token,
+        'token': credentials.token if not ignore_access else None,
         'refresh_token': credentials.refresh_token,
         'scopes': credentials.scopes
     }

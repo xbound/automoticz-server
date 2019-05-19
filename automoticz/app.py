@@ -7,7 +7,7 @@ from dynaconf import FlaskDynaconf
 
 from automoticz.extensions import *
 from automoticz.cli import reset_migrations
-from automoticz.utils.constants import ENV, CACHE_PIN_KEY
+from automoticz.utils.constants import ENV, CACHE_PIN_KEY, CACHE_SET_PIN_KEY
 from automoticz.utils.oauth2 import get_default_credentials
 from automoticz.tasks import get_beacon_pin, set_beacon_pin
 from automoticz.settings_loader import load_celery_imports, load_api_endpoints
@@ -107,7 +107,8 @@ def post_init(app):
         # If configuration requires reload pin attachment on 
         # authentication beacon
         if app.config.RELOAD_PIN_ON_START:
-            set_beacon_pin.delay()
+            if not cache.get(CACHE_SET_PIN_KEY):
+                set_beacon_pin.delay()
 
 
 def create_app():

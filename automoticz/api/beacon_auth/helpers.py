@@ -20,9 +20,16 @@ refresh_token_field = fields.String(
 # Login models
 register_reguest = api.model(
     'Device registration request', {
-        'pin': fields.String(description='Base64 encoded token',
-                             required=True),
-        'client': fields.String(description='Client name', required=True),
+        'pin':
+        fields.String(description='Base64 encoded token', required=True),
+        'client':
+        fields.String(description='Client name'),
+        'client_uuid':
+        fields.String(description='Client UUID (unique identifier)', required=True),
+        'login':
+        fields.String(description='Domoticz user login', required=True),
+        'password':
+        fields.String(description='Domoticz user password', required=True),
     })
 
 register_response = api.model(
@@ -31,8 +38,8 @@ register_response = api.model(
         fields.String(description='Response message', example=MESSAGE.LOGIN),
         'access_token':
         access_token_field,
-        'refresh_token':
-        refresh_token_field,
+        # 'refresh_token':
+        # refresh_token_field,
     })
 
 # Token refresh models

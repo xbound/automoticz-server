@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 09a31a2e42e2
+Revision ID: 050a58ab3113
 Revises: 
-Create Date: 2019-04-22 18:25:12.126348
+Create Date: 2019-05-19 23:00:40.980401
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '09a31a2e42e2'
+revision = '050a58ab3113'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,6 +21,7 @@ def upgrade():
     op.create_table('identity',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_idx', sa.Integer(), nullable=True),
+    sa.Column('logged_in', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('oauth2_credentials',
@@ -41,7 +42,8 @@ def upgrade():
     )
     op.create_table('clients',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('client', sa.String(length=50), nullable=False),
+    sa.Column('client_uuid', sa.String(), nullable=False),
+    sa.Column('client', sa.String(length=50), nullable=True),
     sa.Column('identity_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['identity_id'], ['identity.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -59,8 +61,8 @@ def upgrade():
     sa.Column('token_type', sa.String(length=10), nullable=True),
     sa.Column('expires', sa.DateTime(), nullable=True),
     sa.Column('revoked', sa.Boolean(), nullable=False),
-    sa.Column('client_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['client_id'], ['clients.id'], ),
+    sa.Column('client_id', sa.String(), nullable=True),
+    sa.ForeignKeyConstraint(['client_id'], ['clients.client_uuid'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('jti')
     )

@@ -134,3 +134,20 @@ def turn_switch_light(idx: IdxType, switchMode: str):
         'switchcmd': switchMode
     }
     return domoticz.api_call(params)
+
+
+def log_in(login_b64: str, password_b64: str):
+    '''
+    Command to log in Domoticz using
+    login and password.
+
+    :param login: base64 encoded Domoticz login
+    :param password_b64: base64 encoded password
+    '''
+    params = {
+        'username': login_b64,
+        'password': password_b64,
+        'type': 'command',
+        'param': 'getversion'
+    }
+    return domoticz.api_call(params, use_auth=False)

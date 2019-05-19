@@ -1,9 +1,9 @@
 import base64
 from functools import wraps
 from .constants import *
+from .errors import *
 
 from .auth import *
-from .beacon_auth import *
 
 from .oauth2 import *
 
@@ -49,5 +49,5 @@ def cached_with_key(key):
         return wrapper
     return wrap
 
-
+from .beacon_auth import *
 from .beacons import *

@@ -11,6 +11,7 @@ class Identity(db.Model):
     __tablename__ = 'identity'
     id = db.Column(db.Integer, primary_key=True)
     user_idx = db.Column(db.Integer, nullable=True)
+    logged_in = db.Column(db.Boolean, default=False)
     clients = db.relationship('Client', backref='identity', lazy='dynamic')
 
 
@@ -19,8 +20,8 @@ class JWTBeacon(JWToken):
     Model for storing JWT authorization tokens.
     '''
 
-    client_id = db.Column(db.Integer,
-                          db.ForeignKey('clients.id'),
+    client_id = db.Column(db.String,
+                          db.ForeignKey('clients.client_uuid'),
                           nullable=True)
 
     def to_dict(self):
@@ -41,7 +42,8 @@ class Client(db.Model):
     __tablename__ = 'clients'
 
     id = db.Column(db.Integer, primary_key=True)
-    client = db.Column(db.String(50), nullable=False)
+    client_uuid = db.Column(db.String, nullable=False)
+    client = db.Column(db.String(50), nullable=True)
     tokens = db.relationship('JWTBeacon', backref='client', lazy='dynamic')
     identity_id = db.Column(db.Integer,
                             db.ForeignKey('identity.id'),

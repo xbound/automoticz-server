@@ -5,8 +5,9 @@ from flask_jwt_extended import create_access_token, create_refresh_token
 from flask_restplus import Resource
 
 from automoticz.utils import MESSAGE
-from automoticz.utils import add_client_token, add_new_client_if_not_exists
-from automoticz.utils import is_pin_valid, set_pin, generate_pin
+from automoticz.utils import errors
+from automoticz.utils import add_client_token, add_new_client, client_exists, identity_exists, add_new_identity
+from automoticz.utils import is_pin_valid, set_pin, generate_pin, is_valid_login
 
 from automoticz.tasks import set_beacon_pin
 
@@ -24,12 +25,21 @@ class Login(Resource):
     @api.marshal_with(register_response)
     def post(self):
         data = api.payload
-        pin = data.pop('pin')
+        pin = data.get('pin')
+        login = data.get('login')
+        password_b64 = data.get('password')
         if not is_pin_valid(pin):
             return {'message': MESSAGE.INVALID_UTOKEN}, 400
-        identity = add_new_client_if_not_exists(data)
-        access_token = create_access_token(identity.id)
-        refresh_token = create_refresh_token(identity.id)
+        if not is_valid_login(login, password_b64):
+            raise errors.InvalidDomoticzLoginCredentilas()
+        identity = identity_exists(data)
+        if not identity:
+            identity = add_new_identity(data)
+        identity_client = client_exists(data)
+        if not identity_client:
+            identity_client = add_new_client(identity, data)
+        access_token = create_access_token(identity_client.client_uuid)
+        refresh_token = create_refresh_token(identity_client.client_uuid)
         add_client_token(access_token, app.config.JWT_IDENTITY_CLAIM)
         add_client_token(refresh_token, app.config.JWT_IDENTITY_CLAIM)
         set_beacon_pin.delay()

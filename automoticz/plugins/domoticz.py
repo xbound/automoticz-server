@@ -47,14 +47,14 @@ class DomoticzAPI:
         self.app = app
         self.app.extensions['domoticz'] = self
 
-    def api_call(self, request_params: dict) -> dict:
+    def api_call(self, request_params: dict, use_auth=True) -> dict:
         '''
         Call Domoticz API with request parametres.
         '''
         response = requests.get(
             self.api_url,
             params=request_params,
-            auth=self.auth,
+            auth=self.auth if use_auth else None,
             verify=self.verify_ssl,
             timeout=self.timeout)
         url = response.url

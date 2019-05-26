@@ -4,10 +4,10 @@ from flask import current_app as app
 from flask_jwt_extended import create_access_token, create_refresh_token
 from flask_restplus import Resource
 
-from automoticz.utils import MESSAGE
+from automoticz.utils import RESPONSE_MESSAGE
 from automoticz.utils import errors
-from automoticz.utils import add_client_token, add_new_client, client_exists, identity_exists, add_new_identity
-from automoticz.utils import is_pin_valid, set_pin, generate_pin, is_valid_login
+from automoticz.utils import rest
+from automoticz.utils import *
 
 from automoticz.tasks import set_beacon_pin
 
@@ -29,7 +29,7 @@ class Login(Resource):
         login = data.get('login')
         password_b64 = data.get('password')
         if not is_pin_valid(pin):
-            return {'message': MESSAGE.INVALID_UTOKEN}, 400
+            raise errors.InvalidPin()
         if not is_valid_login(login, password_b64):
             raise errors.InvalidDomoticzLoginCredentilas()
         identity = identity_exists(data)
@@ -44,7 +44,7 @@ class Login(Resource):
         add_client_token(refresh_token, app.config.JWT_IDENTITY_CLAIM)
         set_beacon_pin.delay()
         return {
-            'message': MESSAGE.LOGIN,
+            'message': RESPONSE_MESSAGE.LOGIN,
             'access_token': access_token,
             'refresh_token': refresh_token
         }, 200

@@ -5,7 +5,7 @@ from flask_restplus import fields
 from flask_jwt_extended import jwt_required
 
 from automoticz.models import OAuth2Credentials
-from automoticz.utils.constants import MESSAGE
+from automoticz.utils.constants import RESPONSE_MESSAGE
 from automoticz.extensions import proximity
 from automoticz.utils import get_default_credentials, get_users
 from automoticz.utils.beacons import get_default_auth_beacon_name

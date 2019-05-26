@@ -1,4 +1,5 @@
 import base64
+import json
 from functools import wraps
 from .constants import *
 from .errors import *
@@ -31,12 +32,23 @@ def str_to_base64(data):
     return base64.b64encode(encoded_string).decode()
 
 
+def to_json(data: dict):
+    '''
+    Function to transform python dictionary to
+    json string.
+
+    :param data: dict to convert
+    '''
+    return json.dumps(data)
+
+
 def cached_with_key(key):
     '''Caching decorator for saving function return
     value to cache.
 
     :param key: key.
     '''
+
     def wrap(func):
         def wrapper(*args, **kwargs):
             if kwargs.pop('cached', False):
@@ -46,8 +58,11 @@ def cached_with_key(key):
             val = func(*args, **kwargs)
             cache.set(key, val, timeout=CACHE_LONG_TIMEOUT)
             return val
+
         return wrapper
+
     return wrap
+
 
 from .beacon_auth import *
 from .beacons import *

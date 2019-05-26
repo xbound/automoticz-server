@@ -1,6 +1,7 @@
 from flask_restplus import fields
 
-from automoticz.utils.constants import MESSAGE
+from automoticz.utils.constants import RESPONSE_MESSAGE
+from automoticz.utils import rest
 from . import namespace as api
 
 # Fields
@@ -21,7 +22,7 @@ refresh_token_field = fields.String(
 register_reguest = api.model(
     'Device registration request', {
         'pin':
-        fields.String(description='Base64 encoded token', required=True),
+        rest.Base64String(description='Base64 encoded token', required=True),
         'client':
         fields.String(description='Client name'),
         'client_uuid':
@@ -29,13 +30,13 @@ register_reguest = api.model(
         'login':
         fields.String(description='Domoticz user login', required=True),
         'password':
-        fields.String(description='Domoticz user password', required=True),
+        rest.Base64String(description='Domoticz user password', required=True),
     })
 
 register_response = api.model(
     'Device registration  response', {
         'message':
-        fields.String(description='Response message', example=MESSAGE.LOGIN),
+        fields.String(description='Response message', example=RESPONSE_MESSAGE.LOGIN),
         'access_token':
         access_token_field,
         # 'refresh_token':
@@ -49,7 +50,7 @@ token_refresh_request = api.model('Token refresh request',
 token_refresh_response = api.model(
     'Device token refresh response', {
         'message':
-        fields.String(description='Response message', example=MESSAGE.REFRESH),
+        fields.String(description='Response message', example=RESPONSE_MESSAGE.REFRESH),
         'access_token':
         access_token_field
     })
@@ -62,7 +63,7 @@ revoke_access_response = api.model(
     'Device revoke access response', {
         'message':
         fields.String(description='Response message',
-                      example=MESSAGE.REVOKE_ACCESS)
+                      example=RESPONSE_MESSAGE.REVOKE_ACCESS)
     })
 
 # Revoke refresh models
@@ -73,5 +74,5 @@ revoke_refresh_response = api.model(
     'Device revoke refresh response', {
         'message':
         fields.String(description='Response message',
-                      example=MESSAGE.REVOKE_REFRESH),
+                      example=RESPONSE_MESSAGE.REVOKE_REFRESH),
     })

@@ -9,7 +9,7 @@ from automoticz.utils import CACHE_PIN_KEY, PIN_ATTACHMENT_KEY
 
 
 @cached_with_key('beacon')
-def get_default_auth_beacon_name():
+def get_default_auth_beacon_name() -> str:
     ''' Returns name of the beacon which property "auth" is set to 
     "true".
 
@@ -23,7 +23,7 @@ def get_default_auth_beacon_name():
 
 
 @cached_with_key('project_namespace')
-def get_default_project_namespace():
+def get_default_project_namespace() -> str:
     ''' Returns name of default namespace for attachments
 
     :return: default namespace name
@@ -36,7 +36,7 @@ def get_default_project_namespace():
 
 
 @cached_with_key(CACHE_PIN_KEY)
-def get_pin():
+def get_pin() -> str:
     ''' Checks if for beacon with given name pin attachment
     is set.
 
@@ -57,11 +57,11 @@ def get_pin():
     return data[PIN_ATTACHMENT_KEY]
 
 
-def is_pin_valid(pin):
+def is_pin_valid(pin: str) -> bool:
     ''' Checks if recieved token is valid with current
     u_token attachment.
 
-    :param pin: incomming u_token
+    :param pin: incomming pin
     :return: True or False
     '''
     request_pin = base64_to_str(pin)
@@ -69,7 +69,7 @@ def is_pin_valid(pin):
     return request_pin == current_pin
 
 
-def unset_pin():
+def unset_pin() -> dict:
     ''' Unsets "pin" type attachment on authentication beacon identified
     by beacon_name.
     '''
@@ -85,7 +85,7 @@ def unset_pin():
     return resp
 
 
-def set_pin(pin):
+def set_pin(pin: str) -> dict:
     ''' Sets "pin" type attachment on authentication beacon identified
     by beacon_name.
 
@@ -109,13 +109,13 @@ def set_pin(pin):
     return resp
 
 
-def generate_pin():
+def generate_pin() -> dict:
     ''' Generates new pin.
 
     :return: pin 
     '''
     app = proximity.app
-    return json.dumps({
+    return {
         'url': app.config.PUBLIC_URL,
         PIN_ATTACHMENT_KEY: str(random.randint(1, 999999999))
-    })
+    }

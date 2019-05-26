@@ -5,8 +5,9 @@ import itertools
 from flask import current_app as app
 
 from automoticz.extensions import celery_app, db, cache
-from automoticz.utils import CACHE_PIN_KEY, CACHE_SET_PIN_KEY, CACHE_SET_PIN_KEY_TIMEOUT
-from automoticz.utils import str_to_base64, get_pin, generate_pin, set_pin, get_default_auth_beacon_name
+from automoticz.utils import constants
+from automoticz.utils import to_json, str_to_base64, get_pin, generate_pin, set_pin
+from automoticz.utils import get_default_auth_beacon_name
 
 
 @celery_app.task(bind=True)
@@ -23,8 +24,11 @@ def get_beacon_pin(self):
 @celery_app.task(bind=True)
 def set_beacon_pin(self):
     pin = generate_pin()
-    resp = set_pin(pin)
+    pin_str = to_json(pin)
+    resp = set_pin(pin_str)
     # Veryfing response
-    if resp.get('data') == str_to_base64(pin):
-        cache.set(CACHE_PIN_KEY, pin)
-        cache.set(CACHE_SET_PIN_KEY, pin, timeout=CACHE_SET_PIN_KEY_TIMEOUT)
+    if resp.get('data') == str_to_base64(pin_str):
+        cache.set(constants.CACHE_PIN_KEY, pin[constants.PIN_ATTACHMENT_KEY])
+        cache.set(constants.CACHE_SET_PIN_KEY,
+                  pin,
+                  timeout=constants.CACHE_SET_PIN_KEY_TIMEOUT)

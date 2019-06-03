@@ -1,5 +1,6 @@
 import pytest
 
+from flask_socketio import SocketIOTestClient
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import create_refresh_token
 from automoticz.app import create_app
@@ -27,5 +28,3 @@ def database(app):
 
     _db.session.close()
     _db.drop_all()
-
-

@@ -41,6 +41,15 @@ def to_json(data: dict):
     '''
     return json.dumps(data)
 
+def to_dict(data: str):
+    '''
+    Function to transform python string to
+    dictionary.
+
+    :param data: str to convert
+    '''
+    return json.loads(data)
+
 
 def cached_with_key(key):
     '''Caching decorator for saving function return

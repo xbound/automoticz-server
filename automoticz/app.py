@@ -1,3 +1,6 @@
+from gevent import monkey
+monkey.patch_all()
+
 import os
 
 from flask import Flask
@@ -7,10 +10,12 @@ from dynaconf import FlaskDynaconf
 
 from automoticz.extensions import *
 from automoticz.cli import reset_migrations
-from automoticz.utils.constants import ENV, CACHE_PIN_KEY, CACHE_SET_PIN_KEY
+from automoticz.utils.constants import ENV, CACHE_PIN_KEY, CACHE_SET_PIN_KEY, CACHE_GET_INFO_KEY
 from automoticz.utils.oauth2 import get_default_credentials
-from automoticz.tasks import get_beacon_pin, set_beacon_pin
+from automoticz.tasks import get_beacon_pin, set_beacon_pin, ws_get_info_drom_devices
 from automoticz.settings_loader import load_celery_imports, load_api_endpoints
+
+from automoticz.api.ws import *
 
 
 def configure_app(app):
@@ -34,6 +39,11 @@ def init_extensions(app):
     proximity.init_app(app)
     domoticz.init_app(app)
     cache.init_app(app)
+    socketio.init_app(
+        app,
+        message_queue=app.config.CELERY_BROKER_URL,
+    )
+    wsmanager.init_app(app)
 
 
 def init_cli(app):
@@ -104,11 +114,13 @@ def post_init(app):
         # Getting PIN and saving to cache if not present
         if not cache.get(CACHE_PIN_KEY):
             get_beacon_pin.delay()
-        # If configuration requires reload pin attachment on 
+        # If configuration requires reload pin attachment on
         # authentication beacon
         if app.config.RELOAD_PIN_ON_START:
             if not cache.get(CACHE_SET_PIN_KEY):
                 set_beacon_pin.delay()
+        if not cache.get(CACHE_GET_INFO_KEY):
+            ws_get_info_drom_devices.delay()
 
 
 def create_app():

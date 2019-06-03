@@ -57,18 +57,13 @@ class SysTime(Resource):
         return {'time': time.strftime('%A %B, %d %Y %H:%M:%S')}, 200
 
 
-@namespace.route('/users')
-class Users(Resource):
+@namespace.route('/ws_devices')
+class WSDevices(Resource):
     '''
-    Users endpoint
+    Websocket devices endpoint
     '''
 
     @jwt_required
     def get(self):
-        users = get_users()
-        for user_dict in users:
-            user_dict.pop('Password')
-            for key in user_dict.keys():
-                user_dict[key.lower()] = user_dict.pop(key)
-        return users
+        return {}
         

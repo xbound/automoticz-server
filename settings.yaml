@@ -28,20 +28,35 @@ default:
     - "automoticz.tasks"
 
   RELOAD_PIN_ON_START: false
+  WS_DEVICES:
+    - url: "ws://192.168.0.103/"
+      name: ESP32-DEVICE
+      queries:
+        - key: LIGHTS_OFF
+          params: 
+            type: "MOD"
+            value: "Off"
+        - key: LIGHTS_ON
+          params: 
+            type: "MOD"
+            value: "On"
+        - key: DEVICE_INFO
+          params:
+            type: INFO
 development:
   DEBUG: true
   SQLALCHEMY_DATABASE_URI: "sqlite:///{BASE_URL}/db.sqlite3"
   CELERY_BROKER_URL: "redis://localhost:6379/0"
-  CELERY_RESULT_BACKEND: "redis://localhost:6379/0"
+  CELERY_RESULT_BACKEND: null
   CACHE_TYPE: "redis"
   CACHE_REDIS_HOST: 'localhost'
   CELERY_TASK_DEFAULT_QUEUE: "automoticz"
-  RELOAD_PIN_ON_START: true
+  RELOAD_PIN_ON_START: false
 testing:
   DEBUG: true
   SQLALCHEMY_DATABASE_URI: "sqlite:///:memory:"
   CELERY_BROKER_URL: "redis://localhost:6379/0"
-  CELERY_RESULT_BACKEND: "redis://localhost:6379/0"
+  CELERY_RESULT_BACKEND: null
   CELERY_TASK_DEFAULT_QUEUE: "automoticz_test"
 production:
   RELOAD_PIN_ON_START: false

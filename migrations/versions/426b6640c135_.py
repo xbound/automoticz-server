@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 050a58ab3113
+Revision ID: 426b6640c135
 Revises: 
-Create Date: 2019-05-19 23:00:40.980401
+Create Date: 2019-06-02 22:31:32.635028
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '050a58ab3113'
+revision = '426b6640c135'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -39,6 +39,17 @@ def upgrade():
     sa.Column('scope', sa.String(length=100), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('scope')
+    )
+    op.create_table('wsdevices',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('idx', sa.Integer(), nullable=True),
+    sa.Column('name', sa.String(length=100), nullable=False),
+    sa.Column('machine', sa.String(length=100), nullable=True),
+    sa.Column('sysname', sa.String(length=100), nullable=True),
+    sa.Column('version', sa.String(length=100), nullable=True),
+    sa.Column('device_type', sa.String(length=100), nullable=True),
+    sa.Column('status', sa.String(length=100), nullable=True),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('clients',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -74,6 +85,7 @@ def downgrade():
     op.drop_table('tokens')
     op.drop_table('scopes')
     op.drop_table('clients')
+    op.drop_table('wsdevices')
     op.drop_table('oauth2_scopes')
     op.drop_table('oauth2_credentials')
     op.drop_table('identity')

@@ -2,6 +2,7 @@ from gevent import monkey
 monkey.patch_all()
 
 import os
+import logging.config
 
 from flask import Flask
 from flask import Blueprint

@@ -51,6 +51,7 @@ def load(obj, env=None, silent=True, key=None, filename=None):
     # Return nothing
     BASE_URL = pathlib.Path(__file__).parent
     obj.update(
+        LOGGING_SETTINGS=obj.LOGGING_SETTINGS.format(BASE_URL=str(BASE_URL)),
         CLIENT_SECRETS_FILE=obj.CLIENT_SECRETS_FILE.format(
             BASE_URL=str(BASE_URL)),
         CREDENTIALS_FILE=obj.CREDENTIALS_FILE.format(BASE_URL=str(BASE_URL)),

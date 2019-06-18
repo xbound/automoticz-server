@@ -23,6 +23,7 @@ def configure_app(app):
     Configure app settings.
     '''
     FlaskDynaconf(app)
+    logging.config.fileConfig(app.config.LOGGING_SETTINGS)
 
 
 def init_extensions(app):

@@ -1,4 +1,5 @@
 default:
+  LOGGING_SETTINGS: "{BASE_URL}/logging.ini"
   DEBUG: false
 
   ENCODING_FOR_DYNACONF: "utf-8"

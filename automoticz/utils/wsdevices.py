@@ -45,7 +45,7 @@ def make_ws_command(data_dict: dict):
         json_command=data_dict,
     )
 
-def update_ws_command(device: WSDevice, data_dict: dict):
+def update_ws_command(device: WSCommand, data_dict: dict):
     #TODO
     pass
 
@@ -104,7 +104,7 @@ def update_wsdevice_data(device: WSDevice, data: dict) -> WSDevice:
         new_value = data[column.name]
         if column.name == 'commands':
             commands = WSDevice.commands.all()
-            #TODO
+            for 
         else:
             old_value = getattr(device, column.name, None)
             if new_value != old_value:

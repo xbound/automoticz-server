@@ -45,9 +45,26 @@ def make_ws_command(data_dict: dict):
         json_command=data_dict,
     )
 
-def update_ws_command(device: WSCommand, data_dict: dict):
-    #TODO
-    pass
+
+def update_ws_command(command: WSCommand, data_dict: dict) -> bool:
+    '''
+    Update existing WS command intance.
+
+    :param command: WSCommand instance to update
+    :param data_dict: dict with values to update
+    '''
+    was_updated = False
+    if command.description != data_dict['description']:
+        command.description = data_dict['description']
+        was_updated = True
+    if command.event != data_dict.get('event', 'message'):
+        command.event = data_dict.get('event', 'message')
+        was_updated = True
+    if command.json_command != data_dict:
+        command.json_command = data_dict
+        was_updated = True
+    return was_updated
+
 
 def register_ws_device(sid: str, device_info: dict) -> WSDevice:
     '''
@@ -93,7 +110,7 @@ def get_ws_devices():
     } for ws in wsdevices]
 
 
-def update_wsdevice_data(device: WSDevice, data: dict) -> WSDevice:
+def update_wsdevice_data(wsdevice: WSDevice, data: dict) -> bool:
     '''
     Update device data.
     '''
@@ -101,19 +118,29 @@ def update_wsdevice_data(device: WSDevice, data: dict) -> WSDevice:
     for column in WSDevice.__table__.columns:
         if column.name in ('id', 'idx'):
             continue
-        new_value = data[column.name]
+        value = data[column.name]
         if column.name == 'commands':
-            commands = WSDevice.commands.all()
-            for 
+            for command_data in value:
+                command = wsdevice.commands.filter_by(
+                    name=command_data['name'])
+                if not command:
+                    command = make_ws_command(command_data)
+                    wsdevice.commands.append(command)
+                    db.session.add(command)
+                    was_modified = True
+                else:
+                    command_was_updated = update_ws_command(
+                        command, command_data)
+                    if command_was_updated: was_modified = True
         else:
-            old_value = getattr(device, column.name, None)
-            if new_value != old_value:
-                setattr(device, column.name, new_value)
+            old_value = getattr(wsdevice, column.name, None)
+            if value != old_value:
+                setattr(wsdevice, column.name, value)
                 was_modified = True
-    device.state = data.get('state')
+    wsdevice.state = data.get('state')
     if was_modified:
         db.session.commit()
-    return device
+    return was_modified
 
 
 def get_device_command(device_id, command_id=None,

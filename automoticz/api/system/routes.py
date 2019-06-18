@@ -9,8 +9,10 @@ from automoticz.utils.constants import RESPONSE_MESSAGE
 from automoticz.extensions import proximity
 from automoticz.utils import get_default_credentials, get_users
 from automoticz.utils.beacons import get_default_auth_beacon_name
+from automoticz.utils.wsdevices import get_ws_devices
 
 from . import namespace
+from .helpers import wsdevices_reguest, wsdevice_response
 
 systime_response = namespace.model(
     'System time  response', {
@@ -64,6 +66,8 @@ class WSDevices(Resource):
     '''
 
     @jwt_required
-    def get(self):
-        return {}
+    @namespace.expect(wsdevices_reguest)
+    @namespace.marshal_with(wsdevice_response)
+    def post(self):
+        return get_ws_devices()
         

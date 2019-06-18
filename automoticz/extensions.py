@@ -1,3 +1,5 @@
+import logging
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_caching import Cache
 from flask_jwt_extended import JWTManager
@@ -19,5 +21,6 @@ domoticz = DomoticzAPI()
 from automoticz.plugins.proximity import ProximityBeaconAPI
 proximity = ProximityBeaconAPI()
 
-from automoticz.plugins.wsmanager import WSManager
-wsmanager = WSManager()
+
+def get_logger():
+    return logging.getLogger('root')

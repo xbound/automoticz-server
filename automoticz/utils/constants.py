@@ -5,8 +5,7 @@ class ENV:
 
 
 class RESPONSE_MESSAGE:
-    LOGIN = 'LOGIN'
-    REGISTER = 'REGISTER'
+    LOGIN = 'Login successful'
     REFRESH = 'REFRESH'
     REVOKE_ACCESS = 'REVOKE-ACCESS'
     REVOKE_REFRESH = 'REVOKE-REFRESH'
@@ -15,9 +14,11 @@ class RESPONSE_MESSAGE:
     INVALID_PIN = 'Invalid pin was sent to server'
     INVALID_CREDS = 'Invalid login or password'
     UNKNOWN_LOGIN = 'Invalid user login'
+    NO_TOKEN_PROVIDED = 'No authorization token provided'
 
 
 class RESPONSE_CODE:
+    LOGIN = 'LOGIN'
     DEFAULT_ERROR = 'ERR'
     INVALID_PIN = 'INVALID-PIN'
     INVALID_CREDS = 'INVALID-CREDS'

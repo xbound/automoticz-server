@@ -55,4 +55,4 @@ def load(obj, env=None, silent=True, key=None, filename=None):
             BASE_URL=str(BASE_URL)),
         CREDENTIALS_FILE=obj.CREDENTIALS_FILE.format(BASE_URL=str(BASE_URL)),
         SQLALCHEMY_DATABASE_URI=obj.SQLALCHEMY_DATABASE_URI.format(
-            BASE_URL=str(BASE_URL.parent)))
+            BASE_URL=str(BASE_URL.parent.absolute())))

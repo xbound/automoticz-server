@@ -37,7 +37,7 @@ $ pipenv flask db migrate
 $ pipenv flask db upgrade
 ```
 
-## Running development server
+## Running development server (no Socket.IO support)
 
 ```shell
 $ pipenv run flask run
@@ -45,10 +45,10 @@ $ pipenv run flask run
 
 After starting up server, Swagger API documentation will be available at http://127.0.0.1:5000/api/. 
 
-## Running gunicorn server
+## Running uwsgi server
 
 ```
-$ pipenv run gunicorn
+$ pipenv run uwsgi
 ```
 
 ## Testing and coverage

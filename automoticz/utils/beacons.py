@@ -9,7 +9,7 @@ from automoticz.utils import CACHE_PIN_KEY, PIN_ATTACHMENT_KEY
 
 
 @cached_with_key('beacon')
-def get_default_auth_beacon_name() -> str:
+def get_default_auth_beacon_name(**kwargs) -> str:
     ''' Returns name of the beacon which property "auth" is set to 
     "true".
 
@@ -23,7 +23,7 @@ def get_default_auth_beacon_name() -> str:
 
 
 @cached_with_key('project_namespace')
-def get_default_project_namespace() -> str:
+def get_default_project_namespace(**kwargs) -> str:
     ''' Returns name of default namespace for attachments
 
     :return: default namespace name
@@ -36,7 +36,7 @@ def get_default_project_namespace() -> str:
 
 
 @cached_with_key(CACHE_PIN_KEY)
-def get_pin() -> str:
+def get_pin(**kwargs) -> str:
     ''' Checks if for beacon with given name pin attachment
     is set.
 

@@ -12,7 +12,7 @@ from automoticz.extensions import *
 from automoticz.cli import reset_migrations
 from automoticz.utils.constants import ENV, CACHE_PIN_KEY, CACHE_SET_PIN_KEY, CACHE_GET_INFO_KEY
 from automoticz.utils.oauth2 import get_default_credentials
-from automoticz.tasks import get_beacon_pin, set_beacon_pin, ws_get_info_drom_devices
+from automoticz.tasks import get_beacon_pin, set_beacon_pin
 from automoticz.settings_loader import load_celery_imports, load_api_endpoints
 
 from automoticz.api.ws import *
@@ -39,11 +39,7 @@ def init_extensions(app):
     proximity.init_app(app)
     domoticz.init_app(app)
     cache.init_app(app)
-    socketio.init_app(
-        app,
-        message_queue=app.config.CELERY_BROKER_URL,
-    )
-    wsmanager.init_app(app)
+    
 
 
 def init_cli(app):
@@ -68,11 +64,11 @@ def register_blueprints(app):
     app.register_blueprint(api_blueprint)
 
 
-def init_celery(app=None):
+def init_celery(app=None, celery_context=False):
     '''
     Initialize Celery instance
     '''
-    app = app or create_app()
+    app = app or create_app(run_from_celery=celery_context)
     celery_app.conf.broker_url = app.config.CELERY_BROKER_URL
     celery_app.conf.result_backend = app.config.CELERY_RESULT_BACKEND
     celery_app.conf.task_default_queue = app.config.CELERY_TASK_DEFAULT_QUEUE
@@ -119,11 +115,19 @@ def post_init(app):
         if app.config.RELOAD_PIN_ON_START:
             if not cache.get(CACHE_SET_PIN_KEY):
                 set_beacon_pin.delay()
-        if not cache.get(CACHE_GET_INFO_KEY):
-            ws_get_info_drom_devices.delay()
 
 
-def create_app():
+def init_socketio(app):
+    socketio.init_app(
+        app,
+        message_queue=app.config.CELERY_BROKER_URL,
+        async_mode="gevent_uwsgi",
+        engineio_logger=True,
+    )
+
+
+
+def create_app(run_from_celery=False):
     ''' 
     Create new Flask app instance.
     '''
@@ -131,6 +135,8 @@ def create_app():
     configure_app(app)
     init_extensions(app)
     register_blueprints(app)
+    if not run_from_celery:
+        init_socketio(app)
     init_celery(app)
     init_cli(app)
     post_init(app)

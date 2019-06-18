@@ -9,6 +9,7 @@ from .auth import *
 from .oauth2 import *
 
 from .home import *
+from .wsdevices import *
 
 from automoticz.extensions import cache
 

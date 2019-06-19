@@ -49,9 +49,9 @@ def load(obj, env=None, silent=True, key=None, filename=None):
     # use `obj.logger.debug` to log your loader activities
     # use `obj.find_file('filename.ext')` to find the file in search tree
     # Return nothing
-    BASE_URL = pathlib.Path(__file__).parent
+    BASE_URL = pathlib.Path(__file__).parent.absolute()
     obj.update(
-        LOGGING_SETTINGS=obj.LOGGING_SETTINGS.format(BASE_URL=str(BASE_URL)),
+        LOGGING_SETTINGS=obj.LOGGING_SETTINGS.format(BASE_URL=str(BASE_URL.parent.absolute())),
         CLIENT_SECRETS_FILE=obj.CLIENT_SECRETS_FILE.format(
             BASE_URL=str(BASE_URL)),
         CREDENTIALS_FILE=obj.CREDENTIALS_FILE.format(BASE_URL=str(BASE_URL)),

@@ -14,11 +14,11 @@ celery = "bash scripts/celery.sh"
 [dev-packages]
 pylint = "*"
 yapf = "*"
-pdbpp = "*"
 flask-shell-ipython = "*"
 pytest-cov = "*"
 rope = "*"
 pytest-mock = "*"
+pdbpp = "*"
 
 [requires]
 python_version = "3.5"

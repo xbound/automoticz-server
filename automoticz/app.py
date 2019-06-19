@@ -2,6 +2,7 @@ from gevent import monkey
 monkey.patch_all()
 
 import os
+import logging
 import logging.config
 
 from flask import Flask
@@ -25,6 +26,7 @@ def configure_app(app):
     '''
     FlaskDynaconf(app)
     logging.config.fileConfig(app.config.LOGGING_SETTINGS)
+    
 
 
 def init_extensions(app):

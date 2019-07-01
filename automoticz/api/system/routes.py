@@ -9,10 +9,10 @@ from automoticz.utils.constants import RESPONSE_MESSAGE
 from automoticz.extensions import proximity
 from automoticz.utils import get_default_credentials, get_users
 from automoticz.utils.beacons import get_default_auth_beacon_name
-from automoticz.utils.wsdevices import get_ws_devices
+from automoticz.utils.wsdevices import get_ws_devices, get_ws_device_details
 
 from . import namespace
-from .helpers import wsdevices_reguest, wsdevice_response
+from .helpers import wsdevice_list_response, WSDevice_model
 
 systime_response = namespace.model(
     'System time  response', {
@@ -60,14 +60,31 @@ class SysTime(Resource):
 
 
 @namespace.route('/ws_devices')
-class WSDevices(Resource):
+class WSDeviceList(Resource):
     '''
-    Websocket devices endpoint
+    Websocket device list endpoint.
     '''
 
     @jwt_required
-    @namespace.expect(wsdevices_reguest)
-    @namespace.marshal_with(wsdevice_response)
-    def post(self):
-        return get_ws_devices()
+    @namespace.marshal_with(wsdevice_list_response)
+    def get(self):
+        devices = get_ws_devices() 
+        return {
+            'code': 'WSDEVICES',
+            'message': 'Wsdevices',
+            'wsdevices': devices,
+        }
         
+
+@namespace.route('/ws_devices/<string:device_name>')
+@namespace.header('Authorization', description='Auth header')
+class WSDeviceDetails(Resource):
+    '''
+    Websocket device details endpoint.
+    '''
+
+    @jwt_required
+    @namespace.marshal_with(WSDevice_model)
+    def get(self, device_name):
+        return get_ws_device_details(device_name)
+

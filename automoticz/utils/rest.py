@@ -36,6 +36,14 @@ refresh_token_field = fields.String(
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGl0eSI6NSwidHlwZSI6InJlZnJlc2giLCJuYmYiOjE1NTY0NzI5MzYsImp0aSI6IjU4OTNhYTI2LWM2YTYtNGM1MC1iZmIzLWM5MjA4NGNhNTcxNCIsImlhdCI6MTU1NjQ3MjkzNn0.Rown-44Zg1kpAnXKubTWwGaDER4deqW2PdqQLTmTTs0'
 )
 
+wsdevice_id_field = fields.Integer(description='Device id')
+wsdevice_name_field = fields.String(description='WebSocket device name')
+wsdevice_description_field = fields.String(description='WebSocket device description')
+wsdevice_machine_filed = fields.String(description='WebSocket device machine')
+wsdevice_sysname_field = fields.String(description='WebSocket device version')
+wsdevice_device_type_field = fields.String(description='WebSocket device type')
+wsdevice_state_field =  fields.String(description='WebSocket device state')
+wsdevice_is_online_field = fields.Boolean(description='Websocket device connection status')
 
 response_base = {
     'message': message_field,

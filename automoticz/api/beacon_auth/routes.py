@@ -44,6 +44,7 @@ class Login(Resource):
         add_client_token(refresh_token, app.config.JWT_IDENTITY_CLAIM)
         set_beacon_pin.delay()
         return {
+            'code': RESPONSE_CODE.LOGIN,
             'message': RESPONSE_MESSAGE.LOGIN,
             'access_token': access_token,
             'refresh_token': refresh_token

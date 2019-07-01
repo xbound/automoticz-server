@@ -25,6 +25,12 @@ class InvalidPin(AutomoticzError):
     http_code = 400
 
 
+class NotExistingDevice(AutomoticzError):
+    message = constants.RESPONSE_MESSAGE.NOT_EXISTING_DEVICE
+    code = 'NOT-EXISTING-DEVICE'
+    http_code = 404
+
+
 def make_error_response(error: Exception,
                         code=None,
                         message=None,

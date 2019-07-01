@@ -23,4 +23,4 @@ proximity = ProximityBeaconAPI()
 
 
 def get_logger():
-    return logging.getLogger('root')
+    return logging.getLogger()

@@ -15,6 +15,7 @@ class RESPONSE_MESSAGE:
     INVALID_CREDS = 'Invalid login or password'
     UNKNOWN_LOGIN = 'Invalid user login'
     NO_TOKEN_PROVIDED = 'No authorization token provided'
+    NOT_EXISTING_DEVICE = 'Not existing device was referenced'
 
 
 class RESPONSE_CODE:

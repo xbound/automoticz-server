@@ -34,9 +34,14 @@ class WSCommand(db.Model):
     event = db.Column(db.String(30), nullable=False)
     json_command = db.Column(JSONType, nullable=True)
     device_id = db.Column(db.Integer,
-                            db.ForeignKey('wsdevices.id'),
-                            nullable=True)
+                          db.ForeignKey('wsdevices.id'),
+                          nullable=True)
 
+    def to_dict(self) -> dict:
+        return {
+            'name': self.name,
+            'description': self.description,
+        }
 
 class WSDevice(db.Model):
 
@@ -45,6 +50,7 @@ class WSDevice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     idx = db.Column(db.Integer, nullable=True)
     name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(500), nullable=True)
     device_type = db.Column(db.String(100), nullable=False)
     machine = db.Column(db.String(100), nullable=True)
     sysname = db.Column(db.String(100), nullable=True)
@@ -52,15 +58,15 @@ class WSDevice(db.Model):
     state = db.Column(db.String(100), nullable=True)
     commands = db.relationship('WSCommand', backref='wsdevice', lazy='dynamic')
 
-
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             'name': self.name,
             'machine': self.machine,
             'sysname': self.sysname,
             'version': self.version,
             'device_type': self.device_type,
-            'state': self.state
+            'state': self.state,
+            'commands': [c.to_dict() for c in self.commands.all()]
         }
 
     def __repr__(self):

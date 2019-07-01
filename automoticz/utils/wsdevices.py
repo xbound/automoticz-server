@@ -1,10 +1,34 @@
 from flask import current_app as app
 from automoticz.extensions import db, get_logger
 from automoticz.models import WSDevice, WSCommand
+from automoticz.utils import errors
 
 logger = get_logger()
 
-DEVICES = {}
+
+class DeviceRegister(dict):
+    '''
+    Dictionary data structure for storing
+    registered devices.
+    '''
+
+    def __setitem__(self, key, value):
+        if key in self:
+            del self[key]
+        if value in self:
+            del self[value]
+        dict.__setitem__(self, key, value)
+        dict.__setitem__(self, value, key)
+
+    def __delitem__(self, key):
+        dict.__delitem__(self, self[key])
+        dict.__delitem__(self, key)
+
+    def __len__(self):
+        return dict.__len__(self) // 2
+
+
+DEVICES = DeviceRegister()
 
 
 def get_wsdevice_by_sid(sid: str):
@@ -81,6 +105,8 @@ def register_ws_device(sid: str, device_info: dict) -> WSDevice:
     params = {
         'name':
         device_info['name'],
+        'description':
+        device_info.get('description'),
         'device_type':
         device_info['type'],
         'machine':
@@ -94,6 +120,9 @@ def register_ws_device(sid: str, device_info: dict) -> WSDevice:
         'commands':
         [make_ws_command(command) for command in device_info.get('commands')]
     }
+    if params['description']:
+        if len(params['description']) > 500:
+            params['description'] = params['description'][:497] + '...'
     device = WSDevice(**params)
     db.session.add(device)
     db.session.commit()
@@ -101,13 +130,37 @@ def register_ws_device(sid: str, device_info: dict) -> WSDevice:
     return True
 
 
+def unregister_device(sid):
+    device = get_wsdevice_by_sid(sid)
+    if device:
+        return False
+    DEVICES.pop(sid)
+    return device
+
+
+def is_device_online(device):
+    return device.id in DEVICES
+
+
+def get_ws_device_details(device_name):
+    device = get_wsdevice_by_name(device_name)
+    if not device:
+        raise errors.NotExistingDevice()
+    device_dict = device.to_dict()
+    device_dict.update({
+        'is_online': is_device_online(device),
+    })
+    return device_dict
+
+
 def get_ws_devices():
     wsdevices = WSDevice.query.all()
     return [{
-        'id': ws['id'],
-        'name': ws['name'],
-        'machine': ws['machine'],
-    } for ws in wsdevices]
+        'id': device.id,
+        'name': device.name,
+        'description': device.description,
+        'is_online': is_device_online(device),
+    } for device in wsdevices]
 
 
 def update_wsdevice_data(wsdevice: WSDevice, data: dict) -> bool:

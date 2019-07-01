@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1544b5f5e63ba2e5c84907ff6dbda15338a37d753fb8d47a0c978a404cae7691"
+            "sha256": "47ac78912c96a3d0ec829f65cf16245e18f307559c2caadf1648501d5aafa93d"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -369,10 +369,10 @@
         },
         "jedi": {
             "hashes": [
-                "sha256:2bb0603e3506f708e792c7f4ad8fc2a7a9d9c2d292a358fbbd58da531695595b",
-                "sha256:2c6bcd9545c7d6440951b12b44d373479bf18123a401a52025cf98563fbd826c"
+                "sha256:49ccb782651bb6f7009810d17a3316f8867dde31654c750506970742e18b553d",
+                "sha256:79d0f6595f3846dffcbe667cc6dc821b96e5baa8add125176c31a3917eb19d58"
             ],
-            "version": "==0.13.3"
+            "version": "==0.14.0"
         },
         "jinja2": {
             "hashes": [
@@ -413,10 +413,10 @@
         },
         "jupyter-core": {
             "hashes": [
-                "sha256:927d713ffa616ea11972534411544589976b2493fc7e09ad946e010aa7eb9970",
-                "sha256:ba70754aa680300306c699790128f6fbd8c306ee5927976cbe48adacf240c0b7"
+                "sha256:2c6e7c1e9f2ac45b5c2ceea5730bc9008d92fe59d0725eac57b04c0edfba24f7",
+                "sha256:f4fa22d6cf25f34807c995f22d2923693575c70f02557bcbfbe59bd5ec8d8b84"
             ],
-            "version": "==4.4.0"
+            "version": "==4.5.0"
         },
         "kiwisolver": {
             "hashes": [
@@ -629,10 +629,10 @@
         },
         "parso": {
             "hashes": [
-                "sha256:17cc2d7a945eb42c3569d4564cdf49bde221bc2b552af3eca9c1aad517dcdd33",
-                "sha256:2e9574cb12e7112a87253e14e2c380ce312060269d04bd018478a3c92ea9a376"
+                "sha256:5052bb33be034cba784193e74b1cde6ebf29ae8b8c1e4ad94df0c4209bfc4826",
+                "sha256:db5881df1643bf3e66c097bfd8935cf03eae73f4cb61ae4433c9ea4fb6613446"
             ],
-            "version": "==0.4.0"
+            "version": "==0.5.0"
         },
         "pexpect": {
             "hashes": [
@@ -651,9 +651,9 @@
         },
         "prometheus-client": {
             "hashes": [
-                "sha256:ee0c90350595e4a9f36591f291e6f9933246ea67d7cd7d1d6139a9781b14eaae"
+                "sha256:71cd24a2b3eb335cb800c7159f423df1bd4dcd5171b234be15e3f31ec9f622da"
             ],
-            "version": "==0.7.0"
+            "version": "==0.7.1"
         },
         "prompt-toolkit": {
             "hashes": [
@@ -761,6 +761,7 @@
                 "sha256:89a48591a8850c1f30d735f8e5a0294846da245a9b8940c39e1106e460c7a14e",
                 "sha256:c7ffeac3d81f2d8d63b3ec7ed1e2d4478cc84aa1da666c1934c19432f4b8c0f8"
             ],
+            "index": "pypi",
             "version": "==4.1.0"
         },
         "pytz": {
@@ -930,12 +931,12 @@
         },
         "typing": {
             "hashes": [
-                "sha256:4027c5f6127a6267a435201981ba156de91ad0d1d98e9ddc2aa173453453492d",
-                "sha256:57dcf675a99b74d64dacf6fba08fb17cf7e3d5fdff53d4a30ea2a5e7e52543d4",
-                "sha256:a4c8473ce11a65999c8f59cb093e70686b6c84c98df58c1dae9b3b196089858a"
+                "sha256:38566c558a0a94d6531012c8e917b1b8518a41e418f7f15f00e129cc80162ad3",
+                "sha256:53765ec4f83a2b720214727e319607879fec4acde22c4fbb54fa2604e79e44ce",
+                "sha256:84698954b4e6719e912ef9a42a2431407fe3755590831699debda6fba92aac55"
             ],
             "markers": "python_version < '3.7'",
-            "version": "==3.6.6"
+            "version": "==3.7.4"
         },
         "uritemplate": {
             "hashes": [
@@ -1141,10 +1142,10 @@
         },
         "jedi": {
             "hashes": [
-                "sha256:2bb0603e3506f708e792c7f4ad8fc2a7a9d9c2d292a358fbbd58da531695595b",
-                "sha256:2c6bcd9545c7d6440951b12b44d373479bf18123a401a52025cf98563fbd826c"
+                "sha256:49ccb782651bb6f7009810d17a3316f8867dde31654c750506970742e18b553d",
+                "sha256:79d0f6595f3846dffcbe667cc6dc821b96e5baa8add125176c31a3917eb19d58"
             ],
-            "version": "==0.13.3"
+            "version": "==0.14.0"
         },
         "jinja2": {
             "hashes": [
@@ -1233,10 +1234,10 @@
         },
         "parso": {
             "hashes": [
-                "sha256:17cc2d7a945eb42c3569d4564cdf49bde221bc2b552af3eca9c1aad517dcdd33",
-                "sha256:2e9574cb12e7112a87253e14e2c380ce312060269d04bd018478a3c92ea9a376"
+                "sha256:5052bb33be034cba784193e74b1cde6ebf29ae8b8c1e4ad94df0c4209bfc4826",
+                "sha256:db5881df1643bf3e66c097bfd8935cf03eae73f4cb61ae4433c9ea4fb6613446"
             ],
-            "version": "==0.4.0"
+            "version": "==0.5.0"
         },
         "pathlib2": {
             "hashes": [

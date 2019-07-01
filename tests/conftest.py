@@ -9,7 +9,7 @@ from automoticz.extensions import db as _db
 
 @pytest.fixture
 def app():
-    return create_app()
+    return create_app(True)
 
 
 @pytest.fixture

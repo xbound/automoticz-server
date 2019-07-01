@@ -3,7 +3,7 @@ import uuid
 
 from automoticz.utils import get_pin
 from automoticz.utils import constants
-from tests.helpers import post_json, to_base64, json_response
+from tests.helpers import post_json, to_base64, json_response, get_json
 
 
 def test_ws_devices(app, client):
@@ -27,9 +27,10 @@ def test_ws_devices(app, client):
     access_token = response_json['access_token']
 
     json_payload = {'access_token': access_token}
-    response = post_json(client, 'api/system/ws_devices', json_payload)
+    response = get_json(client, 'api/system/ws_devices', headers={
+        'Authorization': 'Bearer {}'.format(access_token)
+    })
     assert response.status_code == 200
     response_json = json_response(response)
     assert response_json
-    assert type(response_json) == list
-
+    assert type(response_json['wsdevices']) == list

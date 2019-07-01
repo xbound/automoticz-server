@@ -24,7 +24,7 @@ pdbpp = "*"
 python_version = "3.5"
 
 [packages]
-dynaconf = {version = "*",extras = ["yaml"]}
+dynaconf = {extras = ["yaml"],version = "*"}
 flask-jwt-extended = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
@@ -54,3 +54,4 @@ sqlalchemy-jsonfield = "*"
 uwsgi = "*"
 gevent-websocket = "*"
 gevent-tools = "*"
+python-socketio = "*"

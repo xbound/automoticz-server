@@ -1,7 +1,7 @@
 from flask import current_app as app
 from automoticz.extensions import db, get_logger
-from automoticz.models import WSDevice, WSCommand
-from automoticz.utils import errors
+from automoticz.models import WSDevice, WSCommand, WSState
+from automoticz.utils import trim_str, errors
 
 logger = get_logger()
 
@@ -61,7 +61,15 @@ def get_ws_device(sid: str, device_info: dict):
     return device
 
 
-def make_ws_command(data_dict: dict):
+def make_ws_command(data_dict: dict) -> WSCommand:
+    '''
+    Create WSCommand instance from given data
+    dictionary.
+
+    :param data_dict: dictionary with command
+    data.
+    :return: WSCommand instance
+    '''
     return WSCommand(
         name=data_dict['name'],
         description=data_dict['description'],
@@ -90,9 +98,24 @@ def update_ws_command(command: WSCommand, data_dict: dict) -> bool:
     return was_updated
 
 
+def make_ws_state(data_dict: dict):
+    '''
+    Creates instance of WSState.
+    '''
+    return WSState(
+        name=data_dict['name'],
+        description=data_dict.get('description'),
+        value=data_dict.get('value'),
+    )
+
+
 def register_ws_device(sid: str, device_info: dict) -> WSDevice:
     '''
     Add new device into register.
+
+    :param sid: session id.
+    :param device_info: dictionary with 
+    websocket device info.
     '''
     device = get_wsdevice_by_sid(sid)
     if device:
@@ -115,14 +138,12 @@ def register_ws_device(sid: str, device_info: dict) -> WSDevice:
         device_info.get('sysname'),
         'version':
         device_info.get('version'),
-        'state':
-        device_info.get('state') or device_info.get('value'),
+        'states':
+        [make_ws_state(state) for state in device_info.get('states')],
         'commands':
         [make_ws_command(command) for command in device_info.get('commands')]
     }
-    if params['description']:
-        if len(params['description']) > 500:
-            params['description'] = params['description'][:497] + '...'
+    params['description'] = trim_str(params['description'], 500)
     device = WSDevice(**params)
     db.session.add(device)
     db.session.commit()
@@ -131,6 +152,12 @@ def register_ws_device(sid: str, device_info: dict) -> WSDevice:
 
 
 def unregister_device(sid):
+    '''
+    Unregister device with given session id.
+
+    :param sid: session id
+    :retunr None or WSDevice instance.
+    '''
     device = get_wsdevice_by_sid(sid)
     if device:
         return False
@@ -138,7 +165,14 @@ def unregister_device(sid):
     return device
 
 
-def is_device_online(device):
+def is_device_online(device: WSDevice):
+    '''
+    Check if given WSDevice is online.
+
+    :param device: WSDevice instance
+    :return: bool value indicating if
+    device was updated.
+    '''
     return device.id in DEVICES
 
 
@@ -154,6 +188,12 @@ def get_ws_device_details(device_name):
 
 
 def get_ws_devices():
+    '''
+    Returns list of dictionaries with websocket devices'
+    short data.
+
+    :return: list of dictionaries. 
+    '''
     wsdevices = WSDevice.query.all()
     return [{
         'id': device.id,
@@ -166,6 +206,10 @@ def get_ws_devices():
 def update_wsdevice_data(wsdevice: WSDevice, data: dict) -> bool:
     '''
     Update device data.
+
+    :param wsdevice: WSDevice instance.
+    :param data: dictionary with new values.
+    :return: bool value indicating if device data was modified.
     '''
     was_modified = False
     for column in WSDevice.__table__.columns:

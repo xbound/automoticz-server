@@ -14,6 +14,17 @@ from .wsdevices import *
 from automoticz.extensions import cache
 
 
+def trim_str(value: str, chars_num: int, ending='...'):
+    '''
+    Trims string to given length.
+
+    :param chars_num: numer of characters trim to.
+    :return: str
+    '''
+    if len(str) > chars_num:
+        return chars_num[:chars_num]+ending
+    return chars_num
+
 def base64_to_str(data):
     '''
     Encode string data to base64 string.

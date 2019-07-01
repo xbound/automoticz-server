@@ -43,6 +43,15 @@ class WSCommand(db.Model):
             'description': self.description,
         }
 
+class WSState(db.Model):
+
+    __tablename__ = 'WSState'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30), nullable=False)
+    description = db.Column(db.String(500), nullable=True)
+    value = db.Column(db.String(100), nullable=True)
+
 class WSDevice(db.Model):
 
     __tablename__ = 'wsdevices'
@@ -56,6 +65,7 @@ class WSDevice(db.Model):
     sysname = db.Column(db.String(100), nullable=True)
     version = db.Column(db.String(100), nullable=True)
     state = db.Column(db.String(100), nullable=True)
+    states = db.relationship('WSState', backref='wsdevice', lazy='dynamic')
     commands = db.relationship('WSCommand', backref='wsdevice', lazy='dynamic')
 
     def to_dict(self) -> dict:

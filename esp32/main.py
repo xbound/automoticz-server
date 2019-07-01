@@ -16,7 +16,13 @@ DEVICE_INFO = {
     'machine': uos.uname().machine,
     'sysname': uos.uname().sysname,
     'version': uos.uname().version,
-    'state': str(led.value()),
+    'states': [
+        {
+            'name': 'LED',
+            'description': 'State of built-in LED',
+            'value': str(led.value()),
+        },
+    ],
     'commands': device.CONFIG_DATA['Commands']
 }
 

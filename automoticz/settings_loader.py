@@ -50,10 +50,13 @@ def load(obj, env=None, silent=True, key=None, filename=None):
     # use `obj.find_file('filename.ext')` to find the file in search tree
     # Return nothing
     BASE_URL = pathlib.Path(__file__).parent.absolute()
+    PARENT_BASE_URL = BASE_URL.parent.absolute()
     obj.update(
-        LOGGING_SETTINGS=obj.LOGGING_SETTINGS.format(BASE_URL=str(BASE_URL.parent.absolute())),
+        LOGGING_SETTINGS=obj.LOGGING_SETTINGS.format(BASE_URL=str(PARENT_BASE_URL)),
         CLIENT_SECRETS_FILE=obj.CLIENT_SECRETS_FILE.format(
             BASE_URL=str(BASE_URL)),
         CREDENTIALS_FILE=obj.CREDENTIALS_FILE.format(BASE_URL=str(BASE_URL)),
         SQLALCHEMY_DATABASE_URI=obj.SQLALCHEMY_DATABASE_URI.format(
-            BASE_URL=str(BASE_URL.parent.absolute())))
+            BASE_URL=str(PARENT_BASE_URL)
+        )
+    )

@@ -5,7 +5,7 @@ from flask_restplus import Resource
 from google_auth_oauthlib import flow
 
 from automoticz.plugins.proximity import OAUTH2
-from automoticz.utils import add_oauth2_credentials
+from automoticz.utils.oauth2 import add_oauth2_credentials
 
 from . import namespace
 

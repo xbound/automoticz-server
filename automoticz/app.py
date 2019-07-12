@@ -100,6 +100,12 @@ def post_init(app):
 
     Ex. for disabling warnings.
     '''
+
+    @app.before_request
+    def log_request_info():
+        app.logger.debug('Headers: \n%s\n', request.headers)
+        app.logger.debug('Body: %s\n', request.get_data())
+
     if app.config.ENV != ENV.PRODUCTION:
         os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
@@ -124,8 +130,7 @@ def post_init(app):
 def init_socketio(app):
     socketio.init_app(
         app,
-        message_queue=app.config.CELERY_BROKER_URL,
-        async_mode="gevent_uwsgi",
+        message_queue=app.config.SOKETIO_QUEUE,
         engineio_logger=True,
     )
 

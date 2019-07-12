@@ -5,7 +5,7 @@ from flask_jwt_extended import decode_token
 
 from automoticz.extensions import db
 from automoticz.models import Identity, Client, JWTBeacon
-from automoticz.utils import str_to_base64
+from automoticz.utils.tool import str_to_base64
 from automoticz.utils.home import get_users, log_in
 
 
@@ -101,15 +101,14 @@ def add_client_token(encoded_token, identity_claim):
     db.session.commit()
 
 
-def revoke_client_token(token_jti, client_id):
+def revoke_client_token(token_jti):
     '''Revokes the given token
 
     Since we use it only on logout that already require a valid access token,
     if token is not found we raise an exception
     '''
     try:
-        token = JWTBeacon.query.filter_by(jti=token_jti,
-                                          client_id=client_id).one()
+        token = JWTBeacon.query.filter_by(jti=token_jti).one()
         token.revoked = True
         db.session.commit()
     except NoResultFound:

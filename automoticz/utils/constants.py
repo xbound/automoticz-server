@@ -16,13 +16,17 @@ class RESPONSE_MESSAGE:
     UNKNOWN_LOGIN = 'Invalid user login'
     NO_TOKEN_PROVIDED = 'No authorization token provided'
     NOT_EXISTING_DEVICE = 'Not existing device was referenced'
+    EXPIRED_TOKEN = 'Token expired'
+    LOGOUT = 'Logout successful'
 
 
 class RESPONSE_CODE:
     LOGIN = 'LOGIN'
+    LOGOUT = 'LOGOUT'
     DEFAULT_ERROR = 'ERR'
     INVALID_PIN = 'INVALID-PIN'
     INVALID_CREDS = 'INVALID-CREDS'
+    EXPIRED_TOKEN = 'EXPIRED-TOKEN'
 
 
 PIN_ATTACHMENT_KEY = 'pin'

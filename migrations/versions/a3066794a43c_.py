@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 47118133633d
+Revision ID: a3066794a43c
 Revises: 
-Create Date: 2019-06-12 18:41:51.966335
+Create Date: 2019-07-09 11:44:20.620677
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import automoticz
 
 
 # revision identifiers, used by Alembic.
-revision = '47118133633d'
+revision = 'a3066794a43c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -45,11 +45,21 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('idx', sa.Integer(), nullable=True),
     sa.Column('name', sa.String(length=100), nullable=False),
+    sa.Column('description', sa.String(length=500), nullable=True),
     sa.Column('device_type', sa.String(length=100), nullable=False),
     sa.Column('machine', sa.String(length=100), nullable=True),
     sa.Column('sysname', sa.String(length=100), nullable=True),
     sa.Column('version', sa.String(length=100), nullable=True),
     sa.Column('state', sa.String(length=100), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('WSState',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=30), nullable=False),
+    sa.Column('description', sa.String(length=500), nullable=True),
+    sa.Column('value', sa.String(length=100), nullable=True),
+    sa.Column('device_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['device_id'], ['wsdevices.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('clients',
@@ -97,6 +107,7 @@ def downgrade():
     op.drop_table('wscommands')
     op.drop_table('scopes')
     op.drop_table('clients')
+    op.drop_table('WSState')
     op.drop_table('wsdevices')
     op.drop_table('oauth2_scopes')
     op.drop_table('oauth2_credentials')

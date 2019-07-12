@@ -1,5 +1,6 @@
-import socketio
 import random
+
+import socketio
 
 CONFIG_DATA = {
     "Server": "http://192.168.0.108:5000/",
@@ -41,7 +42,13 @@ DEVICE_INFO = {
     'machine': CONFIG_DATA['DeviceInfo']['machine'],
     'sysname': CONFIG_DATA['DeviceInfo']['sysname'],
     'version': CONFIG_DATA['DeviceInfo']['version'],
-    'state': random.choice([True, False]),
+        'states': [
+        {
+            'name': 'LED',
+            'description': 'State of built-in LED',
+            'value': str(random.choice([True, False])),
+        },
+    ],
     'commands': CONFIG_DATA['Commands']
 }
 

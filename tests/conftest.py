@@ -1,15 +1,20 @@
 import pytest
-
+from flask_jwt_extended import create_access_token, create_refresh_token
 from flask_socketio import SocketIOTestClient
-from flask_jwt_extended import create_access_token
-from flask_jwt_extended import create_refresh_token
+
 from automoticz.app import create_app
 from automoticz.extensions import db as _db
 
 
 @pytest.fixture
 def app():
-    return create_app(True)
+    return create_app()
+
+
+@pytest.fixture
+def sio(app):
+    sio = app.extensions['socketio']
+    return sio
 
 
 @pytest.fixture

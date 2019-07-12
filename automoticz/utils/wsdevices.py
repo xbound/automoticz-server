@@ -1,7 +1,8 @@
 from flask import current_app as app
+
 from automoticz.extensions import db, get_logger
-from automoticz.models import WSDevice, WSCommand, WSState
-from automoticz.utils import trim_str, errors
+from automoticz.models import WSCommand, WSDevice, WSState
+from automoticz.utils import errors, tool
 
 logger = get_logger()
 
@@ -11,6 +12,14 @@ class DeviceRegister(dict):
     Dictionary data structure for storing
     registered devices.
     '''
+
+    def pop(self, key, default=None):
+        if key in self:
+            value = self[key]
+            del self[key]
+            return value
+        else:
+            return default
 
     def __setitem__(self, key, value):
         if key in self:
@@ -129,7 +138,7 @@ def register_ws_device(sid: str, device_info: dict) -> WSDevice:
         'name':
         device_info['name'],
         'description':
-        device_info.get('description'),
+        device_info.get('description', ''),
         'device_type':
         device_info['type'],
         'machine':
@@ -143,7 +152,7 @@ def register_ws_device(sid: str, device_info: dict) -> WSDevice:
         'commands':
         [make_ws_command(command) for command in device_info.get('commands')]
     }
-    params['description'] = trim_str(params['description'], 500)
+    params['description'] = tool.trim_str(params['description'], 500)
     device = WSDevice(**params)
     db.session.add(device)
     db.session.commit()
@@ -159,7 +168,7 @@ def unregister_device(sid):
     :retunr None or WSDevice instance.
     '''
     device = get_wsdevice_by_sid(sid)
-    if device:
+    if not device:
         return False
     DEVICES.pop(sid)
     return device

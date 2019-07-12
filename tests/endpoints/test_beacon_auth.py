@@ -1,9 +1,10 @@
 import json
 import uuid
 
-from automoticz.utils import get_pin
+from tests.helpers import json_response, post_json, to_base64, delete_json
+
 from automoticz.utils import constants
-from tests.helpers import post_json, to_base64, json_response
+from automoticz.utils.beacons import get_pin
 
 
 def test_login_mocked(mocker, app, client):
@@ -108,3 +109,31 @@ def test_login(app, client):
     response_json = json_response(response)
     assert response.status_code == 400
     assert constants.RESPONSE_MESSAGE.INVALID_PIN == response_json['message']
+
+
+def test_logout(app, client):
+    domoticz_login = app.config.DOMOTICZ_USERNAME
+    domoticz_password = to_base64(str(app.config.DOMOTICZ_PASSWORD))
+
+    with app.app_context():
+        valid_pin = to_base64(get_pin())
+    json_payload = {
+        'pin': valid_pin,
+        'client': 'Android Google Pixel 3',
+        'client_uuid': str(uuid.uuid1()),
+        'login': domoticz_login,
+        'password': domoticz_password
+    }
+    response = post_json(client, 'api/beacon_auth/login', json_payload)
+    response_json = json_response(response)
+    access_token = response_json['access_token']
+    response = delete_json(client, 'api/beacon_auth/logout', headers={
+        'Authorization': 'Bearer {}'.format(access_token)
+    })
+    assert response.status_code == 200
+    response_json = json_response(response)
+    assert response_json
+
+
+
+

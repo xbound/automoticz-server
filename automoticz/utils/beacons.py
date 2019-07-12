@@ -2,13 +2,11 @@ import random
 import json
 
 from automoticz.extensions import proximity
-from automoticz.utils import base64_to_str
-from automoticz.utils import str_to_base64
-from automoticz.utils import cached_with_key
-from automoticz.utils import CACHE_PIN_KEY, PIN_ATTACHMENT_KEY
+from automoticz.utils import tool
+from automoticz.utils import constants
 
 
-@cached_with_key('beacon')
+@tool.cached_with_key('beacon')
 def get_default_auth_beacon_name(**kwargs) -> str:
     ''' Returns name of the beacon which property "auth" is set to 
     "true".
@@ -22,7 +20,7 @@ def get_default_auth_beacon_name(**kwargs) -> str:
     return default_beacon_name
 
 
-@cached_with_key('project_namespace')
+@tool.cached_with_key('project_namespace')
 def get_default_project_namespace(**kwargs) -> str:
     ''' Returns name of default namespace for attachments
 
@@ -35,7 +33,7 @@ def get_default_project_namespace(**kwargs) -> str:
     return default_project_namespace.split('/')[1]
 
 
-@cached_with_key(CACHE_PIN_KEY)
+@tool.cached_with_key(constants.CACHE_PIN_KEY)
 def get_pin(**kwargs) -> str:
     ''' Checks if for beacon with given name pin attachment
     is set.
@@ -46,15 +44,15 @@ def get_pin(**kwargs) -> str:
     api = proximity.api
     beacon_name = get_default_auth_beacon_name(cached=True)
     namespace = get_default_project_namespace(cached=True)
-    namespaced_type = '{}/{}'.format(namespace, PIN_ATTACHMENT_KEY)
+    namespaced_type = '{}/{}'.format(namespace, constants.PIN_ATTACHMENT_KEY)
     query = {'beaconName': beacon_name, 'namespacedType': namespaced_type}
     resp = api.beacons().attachments().list(**query).execute()
     attachments = resp.get('attachments')
     if not attachments:
         return None
     b64_data = attachments[0]['data']
-    data = json.loads(base64_to_str(b64_data))
-    return data[PIN_ATTACHMENT_KEY]
+    data = json.loads(tool.base64_to_str(b64_data))
+    return data[constants.PIN_ATTACHMENT_KEY]
 
 
 def is_pin_valid(pin: str) -> bool:
@@ -64,7 +62,7 @@ def is_pin_valid(pin: str) -> bool:
     :param pin: incomming pin
     :return: True or False
     '''
-    request_pin = base64_to_str(pin)
+    request_pin = tool.base64_to_str(pin)
     current_pin = get_pin(cached=True)
     return request_pin == current_pin
 
@@ -76,7 +74,7 @@ def unset_pin() -> dict:
     api = proximity.api
     beacon_name = get_default_auth_beacon_name(cached=True)
     namespace = get_default_project_namespace(cached=True)
-    namespaced_type = '{}/{}'.format(namespace, PIN_ATTACHMENT_KEY)
+    namespaced_type = '{}/{}'.format(namespace,constants.PIN_ATTACHMENT_KEY)
     query = {
         'beaconName': beacon_name,
         'namespacedType': namespaced_type,
@@ -94,7 +92,7 @@ def set_pin(pin: str) -> dict:
     api = proximity.api
     beacon_name = get_default_auth_beacon_name(cached=True)
     namespace = get_default_project_namespace(cached=True)
-    namespaced_type = '{}/{}'.format(namespace, PIN_ATTACHMENT_KEY)
+    namespaced_type = '{}/{}'.format(namespace, constants.PIN_ATTACHMENT_KEY)
     if get_pin() is not None:
         unset_pin()
     query = {
@@ -102,7 +100,7 @@ def set_pin(pin: str) -> dict:
         'projectId': proximity.project_id,
         'body': {
             'namespacedType': namespaced_type,
-            'data': str_to_base64(pin),
+            'data': tool.str_to_base64(pin),
         }
     }
     resp = api.beacons().attachments().create(**query).execute()
@@ -117,5 +115,5 @@ def generate_pin() -> dict:
     app = proximity.app
     return {
         'url': app.config.PUBLIC_URL,
-        PIN_ATTACHMENT_KEY: str(random.randint(1, 999999999))
+        constants.PIN_ATTACHMENT_KEY: str(random.randint(1, 999999999))
     }

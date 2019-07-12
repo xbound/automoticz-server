@@ -1,6 +1,5 @@
 from flask_restplus import fields
 
-from automoticz.utils.constants import RESPONSE_MESSAGE
 from automoticz.utils import rest
 from . import namespace as api
 
@@ -30,6 +29,7 @@ WSDevice_list_item = api.model(
 WSDevice_model = api.model(
     'WS Device model',
     {
+        'id': rest.wsdevice_id_field,
         'name': rest.wsdevice_name_field,
         'description': rest.wsdevice_description_field,
         'machine': rest.wsdevice_machine_filed,

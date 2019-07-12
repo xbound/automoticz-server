@@ -1,4 +1,5 @@
 default:
+  PUBLIC_URL: http://192.168.0.108:5000
   LOGGING_SETTINGS: "{BASE_URL}/logging.ini"
   DEBUG: false
 
@@ -28,6 +29,7 @@ default:
   CELERY_TASKS:
     - "automoticz.tasks"
   RELOAD_PIN_ON_START: false
+  SOKETIO_QUEUE: null
 development:
   DEBUG: true
   SQLALCHEMY_DATABASE_URI: "sqlite:///{BASE_URL}/db.sqlite3"
@@ -36,7 +38,8 @@ development:
   CACHE_TYPE: "redis"
   CACHE_REDIS_HOST: 'localhost'
   CELERY_TASK_DEFAULT_QUEUE: "automoticz"
-  RELOAD_PIN_ON_START: false
+  SOKETIO_QUEUE: "redis://localhost:6379/0"
+  RELOAD_PIN_ON_START: true
 testing:
   DEBUG: true
   SQLALCHEMY_DATABASE_URI: "sqlite:///:memory:"

@@ -1,9 +1,10 @@
 import json
 import uuid
 
-from automoticz.utils import get_pin
+from tests.helpers import get_json, json_response, post_json, to_base64
+
 from automoticz.utils import constants
-from tests.helpers import post_json, to_base64, json_response, get_json
+from automoticz.utils.beacons import get_pin
 
 
 def test_ws_devices(app, client):

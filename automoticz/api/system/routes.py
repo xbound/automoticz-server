@@ -1,25 +1,23 @@
 import time
 
-from flask_restplus import Resource
-from flask_restplus import fields
 from flask_jwt_extended import jwt_required
+from flask_restplus import Resource, fields
 
+from automoticz.extensions import proximity
 from automoticz.models import OAuth2Credentials
 from automoticz.utils.constants import RESPONSE_MESSAGE
-from automoticz.extensions import proximity
-from automoticz.utils import get_default_credentials, get_users
-from automoticz.utils.beacons import get_default_auth_beacon_name
-from automoticz.utils.wsdevices import get_ws_devices, get_ws_device_details
+from automoticz.utils.home import get_users
+from automoticz.utils.oauth2 import get_default_credentials
+from automoticz.utils.wsdevices import get_ws_device_details, get_ws_devices
 
 from . import namespace
-from .helpers import wsdevice_list_response, WSDevice_model
+from .helpers import WSDevice_model, wsdevice_list_response
 
 systime_response = namespace.model(
     'System time  response', {
         'time':
-        fields.String(
-            description='Server time',
-            example='Monday March, 04 2019 20:55:33'),
+        fields.String(description='Server time',
+                      example='Monday March, 04 2019 20:55:33'),
     })
 
 
@@ -43,8 +41,7 @@ class Activate(Resource):
         if not proximity.api:
             creds = get_default_credentials()
             proximity.init_api(creds)
-        beacon_name = get_default_auth_beacon_name(cached=True)
-        return {'beacon_name': beacon_name}, 200
+        return {}, 200
 
 
 @namespace.route('/systime')
@@ -68,13 +65,13 @@ class WSDeviceList(Resource):
     @jwt_required
     @namespace.marshal_with(wsdevice_list_response)
     def get(self):
-        devices = get_ws_devices() 
+        devices = get_ws_devices()
         return {
             'code': 'WSDEVICES',
             'message': 'Wsdevices',
             'wsdevices': devices,
         }
-        
+
 
 @namespace.route('/ws_devices/<string:device_name>')
 @namespace.header('Authorization', description='Auth header')
@@ -87,4 +84,3 @@ class WSDeviceDetails(Resource):
     @namespace.marshal_with(WSDevice_model)
     def get(self, device_name):
         return get_ws_device_details(device_name)
-

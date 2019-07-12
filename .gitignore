@@ -128,3 +128,4 @@ client-secrets.json
 credentials.json
 # End of https://www.gitignore.io/api/python
 coverage_report_html/
+config.json

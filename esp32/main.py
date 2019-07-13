@@ -10,12 +10,18 @@ timer = machine.Timer(-1)
 led = machine.Pin(2, machine.Pin.OUT)
 
 DEVICE_INFO = {
-    'name': device.CONFIG_DATA['DeviceInfo']['name'],
-    'description': device.CONFIG_DATA['DeviceInfo']['description'],
-    'type': device.CONFIG_DATA['DeviceInfo']['type'],
-    'machine': uos.uname().machine,
-    'sysname': uos.uname().sysname,
-    'version': uos.uname().version,
+    'name':
+    device.CONFIG_DATA['DeviceInfo']['name'],
+    'description':
+    device.CONFIG_DATA['DeviceInfo']['description'],
+    'type':
+    device.CONFIG_DATA['DeviceInfo']['type'],
+    'machine':
+    uos.uname().machine,
+    'sysname':
+    uos.uname().sysname,
+    'version':
+    uos.uname().version,
     'states': [
         {
             'name': 'LED',
@@ -23,7 +29,8 @@ DEVICE_INFO = {
             'value': str(led.value()),
         },
     ],
-    'commands': device.CONFIG_DATA['Commands']
+    'commands':
+    device.CONFIG_DATA['Commands']
 }
 
 
@@ -74,13 +81,17 @@ def device_start():
                 resp_func = MSG_MAP.get(msg_type, get_error_resp)
                 resp = resp_func(message)
                 print("Response: {}".format(resp))
-                socketio.emit('message', resp)
+                socketio.emit('device_update', resp)
 
             timer.init(mode=machine.Timer.ONE_SHOT,
                        period=3000,
                        callback=lambda t: socketio.emit(
                            'device_register', get_info_resp()))
-
+            timer.init(
+                mode=machine.Timer.PERIODIC,
+                period=5000,
+                callback=
+            )
             socketio.run_forever()
     except Exception as e:
         print("Error: ", e)

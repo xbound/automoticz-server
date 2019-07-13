@@ -7,7 +7,7 @@ from automoticz.utils import errors, tool
 logger = get_logger()
 
 
-class DeviceRegister(dict):
+class TwoWayDict(dict):
     '''
     Dictionary data structure for storing
     registered devices.
@@ -37,7 +37,7 @@ class DeviceRegister(dict):
         return dict.__len__(self) // 2
 
 
-DEVICES = DeviceRegister()
+DEVICES = TwoWayDict()
 
 
 def get_wsdevice_by_sid(sid: str):
@@ -107,6 +107,19 @@ def update_ws_command(command: WSCommand, data_dict: dict) -> bool:
     return was_updated
 
 
+def update_ws_state(state: WSState, data_dict: dict) -> bool:
+    was_updated = False
+    new_desciption = data_dict.get('description')
+    new_value = data_dict.get('value')
+    if state.description != new_desciption and new_desciption:
+        state.description = new_desciption
+        was_updated = True
+    if state.value != new_value and new_value:
+        state.event = new_value
+        was_updated = True
+    return was_updated
+
+
 def make_ws_state(data_dict: dict):
     '''
     Creates instance of WSState.
@@ -118,7 +131,7 @@ def make_ws_state(data_dict: dict):
     )
 
 
-def register_ws_device(sid: str, device_info: dict) -> WSDevice:
+def register_ws_device(sid: str, device_info: dict) -> bool:
     '''
     Add new device into register.
 
@@ -128,11 +141,13 @@ def register_ws_device(sid: str, device_info: dict) -> WSDevice:
     '''
     device = get_wsdevice_by_sid(sid)
     if device:
+        update_wsdevice_data(device, device_info)
         return False
     name = device_info['name']
     device = get_wsdevice_by_name(name)
     if device:
         DEVICES[sid] = device.id
+        update_wsdevice_data(device, device_info)
         return False
     params = {
         'name':
@@ -165,13 +180,28 @@ def unregister_device(sid):
     Unregister device with given session id.
 
     :param sid: session id
-    :retunr None or WSDevice instance.
+    :return None or WSDevice instance.
     '''
     device = get_wsdevice_by_sid(sid)
     if not device:
         return False
     DEVICES.pop(sid)
     return device
+
+
+def remove_unregister_wsdevice(device_name):
+    '''
+    Unregister device with given name and remove
+    it from database.
+
+    :param sid: session id
+    :return None or WSDevice instance.
+    '''
+    wsdevice = get_wsdevice_by_name(device_name)
+    sid = DEVICES[wsdevice.id]
+    unregister_device(sid)
+    db.session.delete()
+    db.session.commit()
 
 
 def is_device_online(device: WSDevice):
@@ -221,31 +251,62 @@ def update_wsdevice_data(wsdevice: WSDevice, data: dict) -> bool:
     :return: bool value indicating if device data was modified.
     '''
     was_modified = False
-    for column in WSDevice.__table__.columns:
-        if column.name in ('id', 'idx'):
-            continue
-        value = data[column.name]
-        if column.name == 'commands':
-            for command_data in value:
-                command = wsdevice.commands.filter_by(
-                    name=command_data['name'])
-                if not command:
-                    command = make_ws_command(command_data)
-                    wsdevice.commands.append(command)
-                    db.session.add(command)
-                    was_modified = True
-                else:
-                    command_was_updated = update_ws_command(
-                        command, command_data)
-                    if command_was_updated: was_modified = True
-        else:
-            old_value = getattr(wsdevice, column.name, None)
-            if value != old_value:
-                setattr(wsdevice, column.name, value)
-                was_modified = True
-    wsdevice.state = data.get('state')
+    name_new = data.get('name')
+    description_new = data.get('description')
+    type_new = data.get('type')
+    machine_new = data.get('machine')
+    sysname_new = data.get('sysname')
+    version_new = data.get('version')
+    if wsdevice.name != name_new and name_new:
+        wsdevice.name = name_new
+        was_modified = True
+    if wsdevice.description != description_new and description_new:
+        wsdevice.description = description_new
+        was_modified = True
+    if wsdevice.device_type != type_new and type_new:
+        wsdevice.device_type = type_new
+        was_modified = True
+    if wsdevice.machine != machine_new and machine_new:
+        wsdevice.machine = machine_new
+        was_modified = True
+    if wsdevice.sysname != sysname_new and sysname_new:
+        wsdevice.sysname = sysname_new
+        was_modified = True
+    if wsdevice.version != version_new and version_new:
+        wsdevice.version = version_new
+        was_modified = True
+    was_modified = _update_wsstates(wsdevice, data.get('states', []))
+    was_modified = _update_wscommands(wsdevice, data.get('commands', []))
     if was_modified:
         db.session.commit()
+    return was_modified
+
+
+def _update_wscommands(wsdevice: WSDevice, commands):
+    was_modified = False
+    for command_data in commands:
+        command = wsdevice.commands.filter_by(name=command_data['name'])
+        if not command:
+            command = make_ws_command(command_data)
+            wsdevice.commands.append(command)
+            db.session.add(command)
+            was_modified = True
+        else:
+            was_modified = update_ws_command(command, command_data)
+    return was_modified
+
+
+def _update_wsstates(wsdevice: WSDevice, states):
+    was_modified = False
+    for state_data in states:
+        state = wsdevice.states.filter_by(name=state_data['name'])
+        if not state:
+            state = make_ws_state(state_data)
+            wsdevice.states.append(state)
+            db.session.add(state)
+            was_modified = True
+        else:
+            was_modified = update_ws_state(state, state_data)
     return was_modified
 
 

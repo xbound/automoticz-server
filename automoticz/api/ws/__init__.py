@@ -11,19 +11,20 @@ log = get_logger()
 
 
 def log_data(data):
-    log.info('Data recived:\n{}'.format(
-        pprint.pformat(data, indent=2)
-    ))
+    log.info('Data recived:\n{}'.format(pprint.pformat(data, indent=2)))
+
 
 @socketio.on('on_data')
 def on_data(data):
     emit('alert', {'a': 1}, room=request.sid)
     return True
 
+
 @socketio.on('connect')
 def on_connect():
     device_sid = request.sid
     log.info('Connected: {}'.format(device_sid))
+
 
 @socketio.on('disconnect')
 def on_discconect():
@@ -31,22 +32,22 @@ def on_discconect():
     device = unregister_device(device_sid)
     if device:
         log.info('Device disconnected with sid: {}'.format(device_sid))
-        
 
 
-@socketio.on('message')
-def on_message(data):
+@socketio.on('device_update')
+def on_device_update(data):
     log_data(data)
     device_sid = request.sid
-    device = get_ws_device(device_sid, data)
-    if not device:
-        return
-    if data.get('message') == 'OK':
-        update_wsdevice_data(device, data)
-        emit('subscribers_notify',
-             device.to_dict(),
-             broadcast=True,
-             include_self=False)
+    if isinstance(data, dict):
+        device = get_ws_device(device_sid, data)
+        if not device:
+            return
+        if data.get('message') == 'OK':
+            update_wsdevice_data(device, data)
+            emit('device_updated',
+                 device.to_dict(),
+                 broadcast=True,
+                 include_self=False)
 
 
 @socketio.on('device_register')

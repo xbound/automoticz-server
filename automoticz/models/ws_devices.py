@@ -39,8 +39,11 @@ class WSCommand(db.Model):
 
     def to_dict(self) -> dict:
         return {
+            'id': self.id,
             'name': self.name,
             'description': self.description,
+            'event': self.event,
+            'json_command': self.json_command,
         }
 
 
@@ -56,6 +59,14 @@ class WSState(db.Model):
                           db.ForeignKey('wsdevices.id'),
                           nullable=True)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'value': self.value,
+        }
+
 
 class WSDevice(db.Model):
 
@@ -69,26 +80,26 @@ class WSDevice(db.Model):
     machine = db.Column(db.String(100), nullable=True)
     sysname = db.Column(db.String(100), nullable=True)
     version = db.Column(db.String(100), nullable=True)
-    state = db.Column(db.String(100), nullable=True)
-    states = db.relationship(
-        'WSState',
-        backref='wsdevice',
-        cascade='all',
-        lazy='dynamic')
-    commands = db.relationship(
-        'WSCommand',
-        cascade='all',
-        backref='wsdevice',
-        lazy='dynamic')
+    states = db.relationship('WSState',
+                             backref='wsdevice',
+                             cascade='all',
+                             lazy='dynamic')
+    commands = db.relationship('WSCommand',
+                               cascade='all',
+                               backref='wsdevice',
+                               lazy='dynamic')
 
     def to_dict(self) -> dict:
         return {
+            'id': self.id,
+            'idx': self.idx,
             'name': self.name,
             'machine': self.machine,
             'sysname': self.sysname,
             'version': self.version,
             'device_type': self.device_type,
-            'state': self.state,
+            'description': self.description,
+            'states': [s.to_dict() for s in self.states.all()],
             'commands': [c.to_dict() for c in self.commands.all()]
         }
 

@@ -81,7 +81,7 @@ def add_new_identity(data):
     return identity
 
 
-def add_client_token(encoded_token, identity_claim):
+def add_client_token(encoded_token, identity_claim, client):
     '''
     Adds a new token to the database. It is not revoked when it is added.
 

@@ -216,7 +216,8 @@ class Websocket:
     def send(self, buf):
         """Send data to the websocket."""
 
-        assert self.open
+        if not self.open:
+            return
 
         if isinstance(buf, str):
             opcode = OP_TEXT

@@ -47,6 +47,7 @@ DEVICE_INFO = {
             'name': 'LED',
             'description': 'State of built-in LED',
             'value': str(random.choice([True, False])),
+            'type': 'switch',
         },
     ],
     'commands': CONFIG_DATA['Commands']

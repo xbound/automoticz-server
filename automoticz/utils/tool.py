@@ -1,8 +1,9 @@
 import base64
 import json
+import pprint
 from functools import wraps
 
-from automoticz.extensions import cache
+from automoticz.extensions import cache, get_logger
 from automoticz.utils.constants import CACHE_LONG_TIMEOUT
 
 
@@ -35,6 +36,10 @@ def str_to_base64(data):
     '''
     encoded_string = str.encode(data)
     return base64.b64encode(encoded_string).decode()
+
+
+def str_to_json(data):
+    return json.loads(data)
 
 
 def to_json(data: dict):
@@ -77,3 +82,88 @@ def cached_with_key(key):
         return wrapper
 
     return wrap
+
+
+class SidRegestry(dict):
+    '''
+    Dictionary data structure for storing
+    registered devices.
+    '''
+
+    def __init__(self):
+        self.sids = []
+
+    def pop(self, key, default=None):
+        if key in self:
+            value = self[key]
+            del self[key]
+            return value
+        else:
+            return default
+
+    def __setitem__(self, key, value):
+        # assuming first key is sid
+        self.sids.append(key)
+        if key in self:
+            del self[key]
+            if key in self.sids:
+                self.sids.remove(key)
+        if value in self:
+            del self[value]
+        dict.__setitem__(self, key, value)
+        dict.__setitem__(self, value, key)
+
+    def __delitem__(self, key):
+        v = self[key]
+        dict.__delitem__(self, v)
+        dict.__delitem__(self, key)
+        if key in self.sids:
+            self.sids.remove(key)
+        if v in self.sids:
+            self.sids.remove(v)
+
+    def __len__(self):
+        return dict.__len__(self) // 2
+
+
+log = get_logger()
+
+request_log_message = ''' Incoming request:
+Headers: 
+{headers}
+Body: 
+{body}
+'''
+
+response_log_message = ''' Outgoing response:
+Headers: 
+{headers}
+Body: 
+{body}
+'''
+
+
+def log_request(request):
+    body = request.get_data()
+    if isinstance(body, bytes):
+        body = body.decode('utf-8')
+    message = request_log_message.format(
+        headers=request.headers,
+        body=body,
+    )
+    log.debug(message)
+
+def log_response(response):
+    body = response.get_data()
+    if isinstance(body, bytes):
+        body = body.decode('utf-8')
+    print(response.headers)
+    message = response_log_message.format(
+        headers=response.headers,
+        body=body,
+    )
+    log.debug(message)
+
+
+def pretty_log_info(message, data):
+    log.info(message.format(pprint.pformat(data, indent=2)))

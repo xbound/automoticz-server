@@ -42,6 +42,7 @@ development:
   RELOAD_PIN_ON_START: true
 testing:
   DEBUG: true
+  WT_ACCESS_TOKEN_EXPIRES: 10 # 5 minutes
   SQLALCHEMY_DATABASE_URI: "sqlite:///:memory:"
   CELERY_BROKER_URL: "redis://localhost:6379/0"
   CELERY_RESULT_BACKEND: "redis://localhost:6379/0"

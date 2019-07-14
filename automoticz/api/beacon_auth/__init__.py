@@ -1,3 +1,4 @@
+from flask import current_app as app
 from flask_restplus import Namespace
 
 from jwt.exceptions import ExpiredSignatureError
@@ -40,19 +41,18 @@ def invalid_domoticz_login_credentials(error):
     return errors.make_error_response(error)
 
 
-@namespace.errorhandler(errors.InvalidPin)
-def invalid_pin(error):
+@namespace.errorhandler(errors.AutomoticzError)
+def automoticz_error(error):
     return errors.make_error_response(error)
+
 
 
 @namespace.errorhandler(ExpiredSignatureError)
 def jwt_token_expired(error):
-    return errors.make_error_response(
-        error,
-        code=RESPONSE_CODE.EXPIRED_TOKEN,
-        message=RESPONSE_MESSAGE.EXPIRED_TOKEN,
-        http_code=401
-    )
+    return errors.make_error_response(error,
+                                      code=RESPONSE_CODE.EXPIRED_TOKEN,
+                                      message=RESPONSE_MESSAGE.EXPIRED_TOKEN,
+                                      http_code=401)
 
 
 # @namespace.errorhandler(binascii.Error)

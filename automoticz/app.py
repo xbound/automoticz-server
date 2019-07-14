@@ -103,8 +103,12 @@ def post_init(app):
 
     @app.before_request
     def log_request_info():
-        app.logger.debug('Headers: \n%s\n', request.headers)
-        app.logger.debug('Body: %s\n', request.get_data())
+        log_request(request)
+
+    @app.after_request
+    def after(response):
+        log_response(response)
+        return response
 
     if app.config.ENV != ENV.PRODUCTION:
         os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -144,8 +148,8 @@ def create_app(run_from_celery=False):
     configure_app(app)
     init_extensions(app)
     register_blueprints(app)
-    if not run_from_celery:
-        init_socketio(app)
+    # if not app.config.ENV != 'testing':
+    init_socketio(app)
     init_celery(app)
     init_cli(app)
     post_init(app)

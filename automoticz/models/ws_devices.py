@@ -44,6 +44,7 @@ class WSCommand(db.Model):
             'description': self.description,
             'event': self.event,
             'json_command': self.json_command,
+            'device_id': self.device_id,
         }
 
 
@@ -52,7 +53,9 @@ class WSState(db.Model):
     __tablename__ = 'WSState'
 
     id = db.Column(db.Integer, primary_key=True)
+    idx = db.Column(db.Integer, nullable=True)
     name = db.Column(db.String(30), nullable=False)
+    state_type = db.Column(db.String(100), nullable=True)
     description = db.Column(db.String(500), nullable=True)
     value = db.Column(db.String(100), nullable=True)
     device_id = db.Column(db.Integer,
@@ -76,7 +79,6 @@ class WSDevice(db.Model):
     idx = db.Column(db.Integer, nullable=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(500), nullable=True)
-    device_type = db.Column(db.String(100), nullable=False)
     machine = db.Column(db.String(100), nullable=True)
     sysname = db.Column(db.String(100), nullable=True)
     version = db.Column(db.String(100), nullable=True)
@@ -97,7 +99,6 @@ class WSDevice(db.Model):
             'machine': self.machine,
             'sysname': self.sysname,
             'version': self.version,
-            'device_type': self.device_type,
             'description': self.description,
             'states': [s.to_dict() for s in self.states.all()],
             'commands': [c.to_dict() for c in self.commands.all()]

@@ -7,8 +7,11 @@ from automoticz.extensions import proximity
 from automoticz.models import OAuth2Credentials
 from automoticz.utils.constants import RESPONSE_MESSAGE
 from automoticz.utils.home import get_users
+from automoticz.utils.rest import response_base
+from automoticz.utils import errors
+from automoticz.tasks import *
 from automoticz.utils.oauth2 import get_default_credentials
-from automoticz.utils.wsdevices import get_ws_device_details, get_ws_devices
+from automoticz.utils.wsdevices import *
 
 from . import namespace
 from .helpers import WSDevice_model, wsdevice_list_response
@@ -19,6 +22,9 @@ systime_response = namespace.model(
         fields.String(description='Server time',
                       example='Monday March, 04 2019 20:55:33'),
     })
+
+execute_command_reponse = namespace.model('Execute command response',
+                                          response_base)
 
 
 @namespace.route('/ping')
@@ -70,10 +76,10 @@ class WSDeviceList(Resource):
             'code': 'WSDEVICES',
             'message': 'Wsdevices',
             'wsdevices': devices,
-        }
+        }, 200
 
 
-@namespace.route('/ws_devices/<string:device_name>')
+@namespace.route('/ws_devices/<int:device_id>')
 @namespace.header('Authorization', description='Auth header')
 class WSDeviceDetails(Resource):
     '''
@@ -82,5 +88,34 @@ class WSDeviceDetails(Resource):
 
     @jwt_required
     @namespace.marshal_with(WSDevice_model)
-    def get(self, device_name):
-        return get_ws_device_details(device_name)
+    def get(self, device_id):
+        return get_ws_device_details(device_id)
+
+
+@namespace.route(
+    '/ws_devices/<int:device_id>/commands/<int:command_id>/execute')
+@namespace.header('Authorization', description='Auth header')
+class WSCommandExecute(Resource):
+    '''
+    Websocket device details endpoint.
+    '''
+
+    @jwt_required
+    @namespace.marshal_with(execute_command_reponse)
+    def get(self, device_id, command_id):
+        device_id = int(device_id)
+        command_id = int(command_id)
+        if not is_device_online(device_id):
+            raise errors.DeviceNotOnline()
+        command = wsdevices.get_device_command(device_id, command_id)
+        if command is None:
+            return {
+                'code': 'COMMAND',
+                'message': 'Command sent for execution',
+            }, 200
+        event = command.event
+        socketio.emit(event, command.json_command)
+        return {
+            'code': 'COMMAND',
+            'message': 'Command sent for execution',
+        }, 200

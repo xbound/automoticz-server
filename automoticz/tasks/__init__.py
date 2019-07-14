@@ -39,3 +39,10 @@ def ws_device_send_command(self, device_id, command_id):
         return
     event = command.event
     socketio.emit(event, command.json_command)
+
+@celery_app.task(bind=True)
+def ws_device_register_domoticz(self, device_id):
+    device = WSDevice.query.get(device_id)
+    if not device:
+        return
+    wsdevices.register_ws_device_domoticz(device)

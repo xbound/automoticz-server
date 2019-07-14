@@ -6,38 +6,7 @@ from automoticz.utils import errors, tool
 
 logger = get_logger()
 
-
-class TwoWayDict(dict):
-    '''
-    Dictionary data structure for storing
-    registered devices.
-    '''
-
-    def pop(self, key, default=None):
-        if key in self:
-            value = self[key]
-            del self[key]
-            return value
-        else:
-            return default
-
-    def __setitem__(self, key, value):
-        if key in self:
-            del self[key]
-        if value in self:
-            del self[value]
-        dict.__setitem__(self, key, value)
-        dict.__setitem__(self, value, key)
-
-    def __delitem__(self, key):
-        dict.__delitem__(self, self[key])
-        dict.__delitem__(self, key)
-
-    def __len__(self):
-        return dict.__len__(self) // 2
-
-
-DEVICES = TwoWayDict()
+DEVICES = tool.SidRegestry()
 
 
 def get_wsdevice_by_sid(sid: str):
@@ -57,7 +26,7 @@ def get_wsdevice_by_name(name: str) -> WSDevice:
     return WSDevice.query.filter_by(name=name).first()
 
 
-def get_ws_device(sid: str, device_info: dict):
+def get_ws_device(sid: str, device_info: dict, as_json=False):
     '''
     Get device by session id or name.
     '''
@@ -66,8 +35,16 @@ def get_ws_device(sid: str, device_info: dict):
         name = device_info.get('name')
         if not name:
             return None
-        return get_wsdevice_by_name(name)
+        device = get_wsdevice_by_name(name)
+    if as_json:
+        return get_ws_device_json(device)
     return device
+
+
+def get_ws_device_json(device: WSDevice):
+    data = device.to_dict()
+    data.update({'is_online': is_device_online(device.id)})
+    return data
 
 
 def make_ws_command(data_dict: dict) -> WSCommand:
@@ -115,7 +92,7 @@ def update_ws_state(state: WSState, data_dict: dict) -> bool:
         state.description = new_desciption
         was_updated = True
     if state.value != new_value and new_value:
-        state.event = new_value
+        state.value = new_value
         was_updated = True
     return was_updated
 
@@ -128,8 +105,14 @@ def make_ws_state(data_dict: dict):
         name=data_dict['name'],
         description=data_dict.get('description'),
         value=data_dict.get('value'),
+        state_type=data_dict.get('state_type', 'text')
     )
 
+def register_ws_device_domoticz(device: WSDevice):
+    states = device.states.query.all()
+    for state in states:
+        if state.idx:
+            continue
 
 def register_ws_device(sid: str, device_info: dict) -> bool:
     '''
@@ -154,8 +137,6 @@ def register_ws_device(sid: str, device_info: dict) -> bool:
         device_info['name'],
         'description':
         device_info.get('description', ''),
-        'device_type':
-        device_info['type'],
         'machine':
         device_info.get('machine'),
         'sysname':
@@ -175,7 +156,7 @@ def register_ws_device(sid: str, device_info: dict) -> bool:
     return True
 
 
-def unregister_device(sid):
+def unregister_device(sid) -> WSDevice:
     '''
     Unregister device with given session id.
 
@@ -204,7 +185,7 @@ def remove_unregister_wsdevice(device_name):
     db.session.commit()
 
 
-def is_device_online(device: WSDevice):
+def is_device_online(device_id: int):
     '''
     Check if given WSDevice is online.
 
@@ -212,16 +193,20 @@ def is_device_online(device: WSDevice):
     :return: bool value indicating if
     device was updated.
     '''
-    return device.id in DEVICES
+    if not isinstance(device_id, int):
+        device_id = int(device_id)
+    return device_id in DEVICES
 
 
-def get_ws_device_details(device_name):
-    device = get_wsdevice_by_name(device_name)
+def get_ws_device_details(device_id):
+    if not isinstance(device_id, int):
+        device_id = int(device_id)
+    device = WSDevice.query.get(device_id)
     if not device:
         raise errors.NotExistingDevice()
     device_dict = device.to_dict()
     device_dict.update({
-        'is_online': is_device_online(device),
+        'is_online': is_device_online(device.id),
     })
     return device_dict
 
@@ -238,7 +223,7 @@ def get_ws_devices():
         'id': device.id,
         'name': device.name,
         'description': device.description,
-        'is_online': is_device_online(device),
+        'is_online': is_device_online(device.id),
     } for device in wsdevices]
 
 
@@ -253,7 +238,6 @@ def update_wsdevice_data(wsdevice: WSDevice, data: dict) -> bool:
     was_modified = False
     name_new = data.get('name')
     description_new = data.get('description')
-    type_new = data.get('type')
     machine_new = data.get('machine')
     sysname_new = data.get('sysname')
     version_new = data.get('version')
@@ -262,9 +246,6 @@ def update_wsdevice_data(wsdevice: WSDevice, data: dict) -> bool:
         was_modified = True
     if wsdevice.description != description_new and description_new:
         wsdevice.description = description_new
-        was_modified = True
-    if wsdevice.device_type != type_new and type_new:
-        wsdevice.device_type = type_new
         was_modified = True
     if wsdevice.machine != machine_new and machine_new:
         wsdevice.machine = machine_new
@@ -275,8 +256,11 @@ def update_wsdevice_data(wsdevice: WSDevice, data: dict) -> bool:
     if wsdevice.version != version_new and version_new:
         wsdevice.version = version_new
         was_modified = True
-    was_modified = _update_wsstates(wsdevice, data.get('states', []))
-    was_modified = _update_wscommands(wsdevice, data.get('commands', []))
+    wsstates_modified = _update_wsstates(wsdevice, data.get('states', []))
+    wscommands_modified = _update_wscommands(wsdevice,
+                                             data.get('commands', []))
+    if wsstates_modified or wscommands_modified:
+        was_modified = True
     if was_modified:
         db.session.commit()
     return was_modified
@@ -285,37 +269,39 @@ def update_wsdevice_data(wsdevice: WSDevice, data: dict) -> bool:
 def _update_wscommands(wsdevice: WSDevice, commands):
     was_modified = False
     for command_data in commands:
-        command = wsdevice.commands.filter_by(name=command_data['name'])
+        command = wsdevice.commands.filter_by(
+            name=command_data['name']).first()
         if not command:
             command = make_ws_command(command_data)
             wsdevice.commands.append(command)
             db.session.add(command)
             was_modified = True
         else:
-            was_modified = update_ws_command(command, command_data)
+            modified = update_ws_command(command, command_data)
+            if modified: was_modified = True
     return was_modified
 
 
 def _update_wsstates(wsdevice: WSDevice, states):
     was_modified = False
     for state_data in states:
-        state = wsdevice.states.filter_by(name=state_data['name'])
+        state = wsdevice.states.filter_by(name=state_data['name']).first()
         if not state:
             state = make_ws_state(state_data)
             wsdevice.states.append(state)
             db.session.add(state)
             was_modified = True
         else:
-            was_modified = update_ws_state(state, state_data)
+            modified = update_ws_state(state, state_data)
+            if modified: was_modified = True
     return was_modified
 
 
-def get_device_command(device_id, command_id=None,
-                       command_name=None) -> WSCommand:
+def get_device_command(device_id, command_id=None) -> WSCommand:
     '''
     Get command instance of device.
 
-    :param device_id: device id
+    :param device_name: device name
     :param command_id:  command id
     :param command_id:  command name
     :return: WSCommand instance or None
@@ -323,9 +309,5 @@ def get_device_command(device_id, command_id=None,
     device = WSDevice.query.get(device_id)
     if not device:
         return None
-    try:
-        command = next(c for c in device.commands
-                       if c.id == command_id or c.name == command_name)
-    except StopIteration:
-        command = None
+    command = device.commands.filter_by(id=command_id).first()
     return command

@@ -14,6 +14,7 @@ WSCommand_model = api.model(
         'description': fields.String(description='Command description'),
         'name': fields.String(description='Command name'),
         'id': fields.String(description='Command ID'),
+        'device_id': fields.Integer(description='Device ID'),
     })
 
 WSState_model = api.model(

@@ -31,6 +31,12 @@ class NotExistingDevice(AutomoticzError):
     http_code = 404
 
 
+class DeviceNotOnline(AutomoticzError):
+    message = 'Device is not online'
+    code = 'DEVICE-NOT-ONLINE'
+    http_code = 503
+
+
 def make_error_response(error: Exception,
                         code=None,
                         message=None,

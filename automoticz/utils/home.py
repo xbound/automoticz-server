@@ -17,7 +17,7 @@ def get_settings():
 
 
 @cache.memoize()
-def get_user_variables(idx: IdxType=None):
+def get_user_variables(idx: IdxType = None):
     '''
     Returns all user variables or returns one
     specified by `idx` argument.
@@ -151,3 +151,55 @@ def log_in(login_b64: str, password_b64: str):
         'param': 'getversion'
     }
     return domoticz.api_call(params, use_auth=False)
+
+def list_hardware():
+    params = {
+        'type': 'hardware',
+    }
+    return domoticz.api_call(params)
+
+def create_device(name, idx, sensor_type):
+    params ={
+        'type': 'createdevice',
+        'idx': idx,
+        'sensorname': name,
+        'sensormappedtype': sensor_type
+    }
+    return domoticz.api_call(params)
+
+def create_virtual_hardware(name):
+    params = {
+        'type': 'command',
+        'param': 'addhardware',
+        'htype': '15',
+        'port': '1',
+        'name': name,
+        'enabled': 'true'
+    }
+    return domoticz.api_call(params)
+
+def update_temperature(idx, value):
+    params = {
+        'type': 'command',
+        'param': 'udevice',
+        'idx': idx,
+        'nvalue': '0',
+        'svalue': value,
+    }
+    return domoticz.api_call(params) 
+
+def update_humidity(idx, value):
+    value = value.split(',')
+    if len(value) != 1:
+        nvalue = value[0]
+        svalue = value[1]
+    else:
+        nvalue = svalue = value[0]
+    params = {
+        'type': 'command',
+        'param': 'udevice',
+        'idx': idx,
+        'nvalue': nvalue,
+        'svalue': svalue,
+    }
+    return domoticz.api_call(params) 

@@ -1,6 +1,7 @@
 from sqlalchemy.orm.exc import NoResultFound
 from automoticz.models import JWToken
 
+
 def is_token_revoked(decoded_token):
     '''
     Checks if the given token is revoked or not. Because we are adding all the

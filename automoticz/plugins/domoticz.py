@@ -14,6 +14,11 @@ class CONSTANTS:
     SWITCH_ON = 'On'
     SWITCH_OFF = 'Off'
 
+class SENSORS:
+    SWITCH = '0xF449'
+    TEMP = '0x5101'
+    TEXT = '0xF313'
+
 
 class DomoticzAPI:
     '''

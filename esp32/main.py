@@ -1,6 +1,7 @@
 import uos
 import utime
 import machine
+import random
 
 import device
 
@@ -8,6 +9,17 @@ import usocketio.client
 
 timer = machine.Timer(-1)
 led = machine.Pin(2, machine.Pin.OUT)
+
+VALUE_MAPPING = {
+    True: 'On',
+    False: 'Off',
+    1: 'On',
+    0: 'Off',
+    'On': True,
+    'Off': False,
+    '1': True,
+    '0': False
+}
 
 DEVICE_INFO = {
     'name':
@@ -26,7 +38,8 @@ DEVICE_INFO = {
         {
             'name': 'LED',
             'description': 'State of built-in LED',
-            'value': str(led.value()),
+            'value': VALUE_MAPPING[led.value()],
+            'state_type': 'switch',
         },
     ],
     'commands':
@@ -42,16 +55,20 @@ def _get_standard_msg_body(message='OK'):
 
 
 def get_mod_resp(msg):
-    VALUE_MAP = {'On': True, 'Off': False, '1': True, '0': False}
     msg_value = msg.get('value')
     if not msg_value:
         return get_error_resp(msg, 'No value set')
-    value_ = VALUE_MAP.get(msg_value)
+    value_ = VALUE_MAPPING.get(msg_value)
     if value_ is None:
         return get_error_resp(msg, 'Bad value {}'.format(msg_value))
     led.value(value_)
     resp = _get_standard_msg_body('MOD')
-    resp['state'] = led.value()
+    resp['states'] = [{
+        'name': 'LED',
+        'description': 'State of built-in LED',
+        'value': VALUE_MAPPING[led.value()],
+        'state_type': 'switch',
+    }]
     return resp
 
 
@@ -78,20 +95,33 @@ def device_start():
             @socketio.on('message')
             def on_message(message):
                 msg_type = message.get('type')
+                print('Incoming message: {}'.format(message))
                 resp_func = MSG_MAP.get(msg_type, get_error_resp)
                 resp = resp_func(message)
                 print("Response: {}".format(resp))
                 socketio.emit('device_update', resp)
 
+            def one_shot(t):
+                socketio.emit('device_register', get_info_resp())
+                # timer.init(mode=machine.Timer.PERIODIC,
+                #            period=15000,
+                #            callback=periodic_task)
+
+            def periodic_task(t):
+                led.value(not led.value())
+                resp = _get_standard_msg_body('UPD')
+                resp['name'] = DEVICE_INFO['name']
+                resp['states'] = [
+                    {
+                        'name': 'LED',
+                        'value': VALUE_MAPPING[led.value()],
+                    },
+                ]
+                socketio.emit('device_update', resp)
+
             timer.init(mode=machine.Timer.ONE_SHOT,
                        period=3000,
-                       callback=lambda t: socketio.emit(
-                           'device_register', get_info_resp()))
-            timer.init(
-                mode=machine.Timer.PERIODIC,
-                period=5000,
-                callback=
-            )
+                       callback=lambda t: one_shot(t))
             socketio.run_forever()
     except Exception as e:
         print("Error: ", e)

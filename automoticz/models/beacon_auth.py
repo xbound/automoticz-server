@@ -42,7 +42,7 @@ class Client(db.Model):
     __tablename__ = 'clients'
 
     id = db.Column(db.Integer, primary_key=True)
-    client_uuid = db.Column(db.String, nullable=False)
+    client_uuid = db.Column(db.String, nullable=False, unique=True)
     client = db.Column(db.String(50), nullable=True)
     tokens = db.relationship('JWTBeacon', backref='client', lazy='dynamic')
     identity_id = db.Column(db.Integer,

@@ -1,17 +1,16 @@
 """empty message
 
-Revision ID: a3066794a43c
+Revision ID: 6d805daf5dd8
 Revises: 
-Create Date: 2019-07-09 11:44:20.620677
+Create Date: 2019-07-14 23:25:49.241070
 
 """
 from alembic import op
 import sqlalchemy as sa
 import automoticz
 
-
 # revision identifiers, used by Alembic.
-revision = 'a3066794a43c'
+revision = '6d805daf5dd8'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -46,16 +45,16 @@ def upgrade():
     sa.Column('idx', sa.Integer(), nullable=True),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('description', sa.String(length=500), nullable=True),
-    sa.Column('device_type', sa.String(length=100), nullable=False),
     sa.Column('machine', sa.String(length=100), nullable=True),
     sa.Column('sysname', sa.String(length=100), nullable=True),
     sa.Column('version', sa.String(length=100), nullable=True),
-    sa.Column('state', sa.String(length=100), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('WSState',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('idx', sa.Integer(), nullable=True),
     sa.Column('name', sa.String(length=30), nullable=False),
+    sa.Column('state_type', sa.String(length=100), nullable=True),
     sa.Column('description', sa.String(length=500), nullable=True),
     sa.Column('value', sa.String(length=100), nullable=True),
     sa.Column('device_id', sa.Integer(), nullable=True),
@@ -68,7 +67,8 @@ def upgrade():
     sa.Column('client', sa.String(length=50), nullable=True),
     sa.Column('identity_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['identity_id'], ['identity.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('client_uuid')
     )
     op.create_table('scopes',
     sa.Column('scope_id', sa.Integer(), nullable=False),

@@ -1,6 +1,7 @@
 from flask import current_app as app
 
 from automoticz.extensions import db, get_logger
+from automoticz.plugins import domoticz
 from automoticz.models import WSCommand, WSDevice, WSState
 from automoticz.utils import errors, tool, home
 
@@ -108,8 +109,24 @@ def make_ws_state(data_dict: dict):
         state_type=data_dict.get('state_type', 'text')
     )
 
-def register_ws_state_domoticz(state: WSState):
-    pass
+def register_ws_state_domoticz(device_idx: int, state: WSState):
+    registered = False
+    if state.idx:
+        return registered
+    name = state.description or state.name
+    state_type = state.state_type.lower()
+    if state_type == 'switch':
+        state_type = domoticz.SENSORS.SWITCH
+    elif state_type in ('temp', 'temperature'):
+        state_type = domoticz.SENSORS.TEMP
+    else:
+        state_type = domoticz.SENSORS.TEXT
+    result = home.create_device(name, device_idx, state_type)
+    idx = int(result['idx'])
+    state.idx = idx
+    registered = True
+    return registered
+
 
 def register_ws_device_domoticz(device: WSDevice):
     was_modified = False
@@ -122,8 +139,9 @@ def register_ws_device_domoticz(device: WSDevice):
     for state in states:
         if state.idx:
             continue
-        
-        
+        registered = register_ws_state_domoticz(device.idx, state)
+        if registered:
+            was_modified = True
     if was_modified:
         db.session.commit()
 

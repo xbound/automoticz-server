@@ -2,7 +2,7 @@ from flask import current_app as app
 
 from automoticz.extensions import db, get_logger
 from automoticz.models import WSCommand, WSDevice, WSState
-from automoticz.utils import errors, tool
+from automoticz.utils import errors, tool, home
 
 logger = get_logger()
 
@@ -108,13 +108,27 @@ def make_ws_state(data_dict: dict):
         state_type=data_dict.get('state_type', 'text')
     )
 
+def register_ws_state_domoticz(state: WSState):
+    pass
+
 def register_ws_device_domoticz(device: WSDevice):
+    was_modified = False
+    if not device.idx:
+        result = home.create_virtual_hardware(device.name)
+        idx = int(result['idx'])
+        device.idx = idx
+        was_modified = True
     states = device.states.query.all()
     for state in states:
         if state.idx:
             continue
+        
+        
+    if was_modified:
+        db.session.commit()
 
-def register_ws_device(sid: str, device_info: dict) -> bool:
+
+def register_ws_device(sid: str, device_info: dict) -> WSDevice:
     '''
     Add new device into register.
 
@@ -125,13 +139,13 @@ def register_ws_device(sid: str, device_info: dict) -> bool:
     device = get_wsdevice_by_sid(sid)
     if device:
         update_wsdevice_data(device, device_info)
-        return False
+        return None
     name = device_info['name']
     device = get_wsdevice_by_name(name)
     if device:
         DEVICES[sid] = device.id
         update_wsdevice_data(device, device_info)
-        return False
+        return None
     params = {
         'name':
         device_info['name'],
@@ -153,7 +167,7 @@ def register_ws_device(sid: str, device_info: dict) -> bool:
     db.session.add(device)
     db.session.commit()
     DEVICES[sid] = device.id
-    return True
+    return device
 
 
 def unregister_device(sid) -> WSDevice:

@@ -9,6 +9,8 @@ from automoticz.utils.tool import *
 from automoticz.utils.wsdevices import *
 from automoticz.utils.wssubcribers import *
 
+from automoticz.tasks import ws_device_register_domoticz
+
 
 def log_data(data):
     pretty_log_info('Data recived:\n{}', data)
@@ -51,6 +53,7 @@ def on_device_update(data):
     if not device:
         return
     was_updated = update_wsdevice_data(device, data)
+    ws_device_register_domoticz.delay(device.id)
     if was_updated:
         emit('device_updated',
              get_ws_device(device_sid, data, as_json=True),
@@ -63,8 +66,9 @@ def on_device_update(data):
 def on_device_register(data):
     log_data(data)
     device_sid = request.sid
-    is_new = register_ws_device(device_sid, data)
-    if is_new:
+    device = register_ws_device(device_sid, data)
+    ws_device_register_domoticz.delay(device.id)
+    if device:
         log.info('Device registered: {}'.format(str(data)))
     else:
         log.info('Device re-register: {}'.format(str(data)))

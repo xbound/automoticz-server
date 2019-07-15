@@ -4,6 +4,7 @@ from datetime import datetime
 from dateutil import parser
 from flask import current_app as app
 
+from automoticz.models import ws_devices
 from automoticz.extensions import cache, celery_app, db, socketio
 from automoticz.utils import beacons, constants, tool, wsdevices
 
@@ -42,7 +43,7 @@ def ws_device_send_command(self, device_id, command_id):
 
 @celery_app.task(bind=True)
 def ws_device_register_domoticz(self, device_id):
-    device = WSDevice.query.get(device_id)
+    device = ws_devices.WSDevice.query.get(device_id)
     if not device:
         return
     wsdevices.register_ws_device_domoticz(device)

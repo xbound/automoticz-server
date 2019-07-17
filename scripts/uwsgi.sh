@@ -5,4 +5,4 @@ uwsgi --http 0.0.0.0:5000 \
       --http-websockets \
       --master \
       --wsgi-file automoticz/wsgi.py \
-      --callable app
+      --callable server

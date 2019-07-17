@@ -152,20 +152,23 @@ def log_in(login_b64: str, password_b64: str):
     }
     return domoticz.api_call(params, use_auth=False)
 
+
 def list_hardware():
     params = {
         'type': 'hardware',
     }
     return domoticz.api_call(params)
 
+
 def create_device(name, idx, sensor_type):
-    params ={
+    params = {
         'type': 'createdevice',
         'idx': idx,
         'sensorname': name,
         'sensormappedtype': sensor_type
     }
     return domoticz.api_call(params)
+
 
 def create_virtual_hardware(name):
     params = {
@@ -178,6 +181,7 @@ def create_virtual_hardware(name):
     }
     return domoticz.api_call(params)
 
+
 def update_temperature(idx, value):
     params = {
         'type': 'command',
@@ -186,7 +190,19 @@ def update_temperature(idx, value):
         'nvalue': '0',
         'svalue': value,
     }
-    return domoticz.api_call(params) 
+    return domoticz.api_call(params)
+
+
+def update_text(idx, value):
+    params = {
+        'type': 'command',
+        'param': 'udevice',
+        'idx': idx,
+        'nvalue': '0',
+        'svalue': value,
+    }
+    return domoticz.api_call(params)
+
 
 def update_humidity(idx, value):
     value = value.split(',')
@@ -202,4 +218,9 @@ def update_humidity(idx, value):
         'nvalue': nvalue,
         'svalue': svalue,
     }
-    return domoticz.api_call(params) 
+    return domoticz.api_call(params)
+
+
+def delete_hardware(idx):
+    params = {'type': 'command', 'param': 'deletehardware', 'idx': idx}
+    return domoticz.api_call(params)

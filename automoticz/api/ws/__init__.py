@@ -53,7 +53,7 @@ def on_device_update(data):
     if not device:
         return
     was_updated = update_wsdevice_data(device, data)
-    ws_device_register_domoticz.delay(device.id)
+    # ws_device_register_domoticz.delay(device.id)
     if was_updated:
         emit('device_updated',
              get_ws_device(device_sid, data, as_json=True),
@@ -66,12 +66,11 @@ def on_device_update(data):
 def on_device_register(data):
     log_data(data)
     device_sid = request.sid
-    device = register_ws_device(device_sid, data)
+    register_ws_device(device_sid, data)
+    device = get_ws_device(device_sid, data)
     ws_device_register_domoticz.delay(device.id)
     if device:
         log.info('Device registered: {}'.format(str(data)))
-    else:
-        log.info('Device re-register: {}'.format(str(data)))
     emit('device_updated',
          get_ws_device(device_sid, data, as_json=True),
          room='subscribers',

@@ -1,6 +1,7 @@
 from flask import current_app as app
 from flask_restplus import Namespace
 
+from flask_jwt_extended.exceptions import InvalidHeaderError
 from jwt.exceptions import ExpiredSignatureError
 from google.auth import exceptions
 from automoticz.utils import errors
@@ -48,6 +49,7 @@ def automoticz_error(error):
 
 
 @namespace.errorhandler(ExpiredSignatureError)
+@namespace.errorhandler(InvalidHeaderError)
 def jwt_token_expired(error):
     return errors.make_error_response(error,
                                       code=RESPONSE_CODE.EXPIRED_TOKEN,

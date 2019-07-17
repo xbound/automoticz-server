@@ -68,6 +68,7 @@ class WSState(db.Model):
             'name': self.name,
             'description': self.description,
             'value': self.value,
+            'state_type': self.state_type,
         }
 
 

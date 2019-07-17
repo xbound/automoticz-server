@@ -58,7 +58,7 @@ def _connect_http(hostname, port, path):
             elif header == b'content-length':
                 length = int(value)
 
-        data = sock.readline()
+        data = sock.read()
         return decode_payload(data)
 
     finally:

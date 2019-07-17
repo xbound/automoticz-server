@@ -1,11 +1,9 @@
 from flask import current_app as app
 
-from automoticz.extensions import db, get_logger
-from automoticz.plugins import domoticz
+from automoticz.extensions import db
+from automoticz.plugins.domoticz import SENSORS
 from automoticz.models import WSCommand, WSDevice, WSState
 from automoticz.utils import errors, tool, home
-
-logger = get_logger()
 
 DEVICES = tool.SidRegestry()
 
@@ -95,6 +93,7 @@ def update_ws_state(state: WSState, data_dict: dict) -> bool:
     if state.value != new_value and new_value:
         state.value = new_value
         was_updated = True
+    update_state_in_domoticz(state)
     return was_updated
 
 
@@ -102,12 +101,12 @@ def make_ws_state(data_dict: dict):
     '''
     Creates instance of WSState.
     '''
-    return WSState(
-        name=data_dict['name'],
-        description=data_dict.get('description'),
-        value=data_dict.get('value'),
-        state_type=data_dict.get('state_type', 'text')
-    )
+    state_type = data_dict.get('state_type', 'text')
+    return WSState(name=data_dict['name'],
+                   description=data_dict.get('description'),
+                   value=data_dict.get('value'),
+                   state_type=state_type)
+
 
 def register_ws_state_domoticz(device_idx: int, state: WSState):
     registered = False
@@ -116,11 +115,11 @@ def register_ws_state_domoticz(device_idx: int, state: WSState):
     name = state.description or state.name
     state_type = state.state_type.lower()
     if state_type == 'switch':
-        state_type = domoticz.SENSORS.SWITCH
+        state_type = SENSORS.SWITCH
     elif state_type in ('temp', 'temperature'):
-        state_type = domoticz.SENSORS.TEMP
+        state_type = SENSORS.TEMP
     else:
-        state_type = domoticz.SENSORS.TEXT
+        state_type = SENSORS.TEXT
     result = home.create_device(name, device_idx, state_type)
     idx = int(result['idx'])
     state.idx = idx
@@ -135,7 +134,7 @@ def register_ws_device_domoticz(device: WSDevice):
         idx = int(result['idx'])
         device.idx = idx
         was_modified = True
-    states = device.states.query.all()
+    states = device.states.all()
     for state in states:
         if state.idx:
             continue
@@ -156,13 +155,13 @@ def register_ws_device(sid: str, device_info: dict) -> WSDevice:
     '''
     device = get_wsdevice_by_sid(sid)
     if device:
-        update_wsdevice_data(device, device_info)
-        return None
+        device = update_wsdevice_data(device, device_info)
+        return device
     name = device_info['name']
     device = get_wsdevice_by_name(name)
     if device:
         DEVICES[sid] = device.id
-        update_wsdevice_data(device, device_info)
+        device = update_wsdevice_data(device, device_info)
         return None
     params = {
         'name':
@@ -185,7 +184,7 @@ def register_ws_device(sid: str, device_info: dict) -> WSDevice:
     db.session.add(device)
     db.session.commit()
     DEVICES[sid] = device.id
-    return device
+    return get_wsdevice_by_name(device_info['name'])
 
 
 def unregister_device(sid) -> WSDevice:
@@ -295,7 +294,7 @@ def update_wsdevice_data(wsdevice: WSDevice, data: dict) -> bool:
         was_modified = True
     if was_modified:
         db.session.commit()
-    return was_modified
+    return wsdevice
 
 
 def _update_wscommands(wsdevice: WSDevice, commands):
@@ -343,3 +342,28 @@ def get_device_command(device_id, command_id=None) -> WSCommand:
         return None
     command = device.commands.filter_by(id=command_id).first()
     return command
+
+
+SWITCH_STATE = {
+    'On': 'On',
+    'Off': 'Off',
+    'on': 'On',
+    'off': 'Off',
+    'True': 'On',
+    'False': 'Off',
+    '1': 'On',
+    '0': 'Off',
+}
+
+
+def update_state_in_domoticz(state: WSState):
+    state_type = state.state_type
+    value = state.value
+    if state_type == 'switch':
+        home.turn_switch_light(state.idx, SWITCH_STATE.get(value))
+    elif state_type in ('temp', 'temperature'):
+        state_type = SENSORS.TEMP
+        home.update_humidity(state.idx, value)
+    else:
+        state_type = SENSORS.TEXT
+        home.update_text(state.idx, value)
